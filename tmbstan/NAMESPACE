@@ -1,0 +1,14 @@
+exportPattern("^[[:alpha:]]+")
+importFrom("Rcpp", "loadModule")
+
+importFrom(rstan,constrain_pars)
+importFrom(rstan,extract)
+importFrom(rstan,extract_sparse_parts)
+importFrom(rstan,get_logposterior)
+importFrom(rstan,get_posterior_mean)
+importFrom(rstan,optimizing)
+importFrom(rstan,sampling)
+importFrom(rstan,stanc)
+importFrom(rstan,vb)
+
+useDynLib(tmbstan, .registration = TRUE)
