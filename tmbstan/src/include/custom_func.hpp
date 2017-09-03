@@ -64,14 +64,16 @@ namespace stan {
     typedef Eigen::Matrix<var,Eigen::Dynamic,1> vector_var;
     inline var custom_func(const vector_var& x_) {
       std::vector<var> x(x_.size());
-      for (size_t i = 0; i < x_.size(); ++i) {x[i] = x_(i);}
+      for (EIGEN_DEFAULT_DENSE_INDEX_TYPE i = 0; i < x_.size(); ++i) {
+        x[i] = x_(i);
+      }
       return var(new custom_func_vector_vari(x));
     }
     /* Make it work for Eigen vectors */
     typedef Eigen::Matrix<double,Eigen::Dynamic,1> vector_double;
     inline double custom_func(const vector_double& x_) {
       double* px = REAL(x);
-      for (size_t i = 0; i < x_.size(); ++i) {
+      for (EIGEN_DEFAULT_DENSE_INDEX_TYPE i = 0; i < x_.size(); ++i) {
         px[i] = x_(i);
       }
       SEXP y;
