@@ -1,5 +1,6 @@
 ## Auto generate generic model template for tmbstan
 outfile <- "tmbstan/src/include/model.hpp"
+cpyfile <- "tmbstan/inst/model.hpp"
 
 library(rstan)
 
@@ -28,3 +29,6 @@ pattern <- "lp_accum__.add(normal_log<propto__>(y, 0, 1));"
 replace <- "lp_accum__.add(custom_func(y));"
 mod <- gsub(pattern, replace, readLines(outfile), fixed=TRUE)
 writeLines(mod, outfile)
+
+## Need a copy in 'inst' folder
+writeLines(mod, cpyfile)
