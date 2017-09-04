@@ -2,24 +2,24 @@
 namespace stan {
   namespace math {
     namespace {
-      SEXP x;
+      SEXP R_x;
       SEXP R_fcall;
       SEXP R_gcall;
-      SEXP env;
+      SEXP R_env;
       extern "C" {
         SEXP set_pointers(SEXP x_, SEXP f_, SEXP g_, SEXP e_ ) {
-          x = x_; R_fcall = f_; R_gcall = g_; env = e_;
+          R_x = x_; R_fcall = f_; R_gcall = g_; R_env = e_;
           return R_NilValue;
         }
       }
       double custom_func_as_double(const std::vector<var>& xvar) {
         // Set evaluation point
-        double* px = REAL(x);
+        double* px = REAL(R_x);
         for (size_t i = 0; i < xvar.size(); ++i) {
           px[i] = xvar[i].val();
         }
         SEXP y;
-        PROTECT( y = Rf_eval(R_fcall, env) );
+        PROTECT( y = Rf_eval(R_fcall, R_env) );
         double ans = -REAL(y)[0];
         UNPROTECT(1);
         return ans;
@@ -28,12 +28,12 @@ namespace stan {
       void gradient_custom_func_as_double(const std::vector<double>& x_,
                                           std::vector<double>& g) {
         // Set evaluation point
-        double* px = REAL(x);
+        double* px = REAL(R_x);
         for (size_t i = 0; i < x_.size(); ++i) {
           px[i] = x_[i];
         }
         SEXP y;
-        PROTECT( y = Rf_eval(R_gcall, env) );
+        PROTECT( y = Rf_eval(R_gcall, R_env) );
         double* py = REAL(y);
         for (size_t i = 0; i < x_.size(); ++i) {
           g[i] = -py[i];
@@ -72,12 +72,12 @@ namespace stan {
     /* Make it work for Eigen vectors */
     typedef Eigen::Matrix<double,Eigen::Dynamic,1> vector_double;
     inline double custom_func(const vector_double& x_) {
-      double* px = REAL(x);
+      double* px = REAL(R_x);
       for (EIGEN_DEFAULT_DENSE_INDEX_TYPE i = 0; i < x_.size(); ++i) {
         px[i] = x_(i);
       }
       SEXP y;
-      PROTECT( y = Rf_eval(R_fcall, env) );
+      PROTECT( y = Rf_eval(R_fcall, R_env) );
       double ans = -REAL(y)[0];
       UNPROTECT(1);
       return ans;
