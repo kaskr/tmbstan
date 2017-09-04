@@ -1,5 +1,6 @@
 ## Auto generate generic model template for tmbstan
 outfile <- "tmbstan/src/include/model.hpp"
+modfile <- "tmbstan/src/Modules.cpp"
 cpyfile <- "tmbstan/inst/model.hpp"
 
 library(rstan)
@@ -32,3 +33,10 @@ writeLines(mod, outfile)
 
 ## Need a copy in 'inst' folder
 file.copy(outfile, cpyfile, overwrite=TRUE)
+
+## Write 'module code'
+code <- rstan:::get_Rcpp_module_def_code("model_tmb")
+cat("#include <Rcpp.h>\nusing namespace Rcpp;\n#include \"include/model.hpp\"\n",
+    file=modfile)
+cat(code, file=modfile, append=TRUE)
+cat("\n", file=modfile, append=TRUE)

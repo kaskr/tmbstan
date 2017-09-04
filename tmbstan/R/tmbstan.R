@@ -8,7 +8,7 @@ tmbstan_model <- function(par, fn, gr) {
     model_code <- "tmb_generic"
     dso <- new("cxxdso")
     model_cppcode <- readLines(system.file("model.hpp", package="tmbstan"))
-    mk_cppmodule <- function(x) model_tmb
+    mk_cppmodule <- function(x) stan_fit4model_tmb
     obj <- new("stanmodel",
                model_name = model_name,
                model_code = model_code,

@@ -1,3 +1,3 @@
 .onLoad <- function(libname, pkgname) { # nocov start
-    loadModule("stan_fit4tmb_mod", what=TRUE)
+    loadModule("stan_fit4model_tmb_mod", what=TRUE)
 }
