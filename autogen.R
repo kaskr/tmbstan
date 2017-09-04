@@ -31,4 +31,4 @@ mod <- gsub(pattern, replace, readLines(outfile), fixed=TRUE)
 writeLines(mod, outfile)
 
 ## Need a copy in 'inst' folder
-writeLines(mod, cpyfile)
+file.copy(outfile, cpyfile)
