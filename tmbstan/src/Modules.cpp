@@ -7,7 +7,7 @@ RCPP_MODULE(stan_fit4tmb_mod) {
 
     class_<rstan::stan_fit<model_tmb_namespace::model_tmb, boost::random::ecuyer1988> >("model_tmb")
 
-    .constructor<SEXP,SEXP>()
+    .constructor<SEXP,SEXP,SEXP>()
 
 
     .method("call_sampler", &rstan::stan_fit<model_tmb_namespace::model_tmb, boost::random::ecuyer1988> ::call_sampler)
