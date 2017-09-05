@@ -34,8 +34,8 @@ class model_tmb : public prob_grad {
 private:
     int N;
     int have_bounds;
-    vector_d lower;
-    vector_d upper;
+    vector_d lower_bound;
+    vector_d upper_bound;
 public:
     model_tmb(stan::io::var_context& context__,
         std::ostream* pstream__ = 0)
@@ -79,25 +79,25 @@ public:
         vals_i__ = context__.vals_i("have_bounds");
         pos__ = 0;
         have_bounds = vals_i__[pos__++];
-        validate_non_negative_index("lower", "(N * have_bounds)", (N * have_bounds));
-        context__.validate_dims("data initialization", "lower", "vector_d", context__.to_vec((N * have_bounds)));
-        validate_non_negative_index("lower", "(N * have_bounds)", (N * have_bounds));
-        lower = vector_d(static_cast<Eigen::VectorXd::Index>((N * have_bounds)));
-        vals_r__ = context__.vals_r("lower");
+        validate_non_negative_index("lower_bound", "(N * have_bounds)", (N * have_bounds));
+        context__.validate_dims("data initialization", "lower_bound", "vector_d", context__.to_vec((N * have_bounds)));
+        validate_non_negative_index("lower_bound", "(N * have_bounds)", (N * have_bounds));
+        lower_bound = vector_d(static_cast<Eigen::VectorXd::Index>((N * have_bounds)));
+        vals_r__ = context__.vals_r("lower_bound");
         pos__ = 0;
-        size_t lower_i_vec_lim__ = (N * have_bounds);
-        for (size_t i_vec__ = 0; i_vec__ < lower_i_vec_lim__; ++i_vec__) {
-            lower[i_vec__] = vals_r__[pos__++];
+        size_t lower_bound_i_vec_lim__ = (N * have_bounds);
+        for (size_t i_vec__ = 0; i_vec__ < lower_bound_i_vec_lim__; ++i_vec__) {
+            lower_bound[i_vec__] = vals_r__[pos__++];
         }
-        validate_non_negative_index("upper", "(N * have_bounds)", (N * have_bounds));
-        context__.validate_dims("data initialization", "upper", "vector_d", context__.to_vec((N * have_bounds)));
-        validate_non_negative_index("upper", "(N * have_bounds)", (N * have_bounds));
-        upper = vector_d(static_cast<Eigen::VectorXd::Index>((N * have_bounds)));
-        vals_r__ = context__.vals_r("upper");
+        validate_non_negative_index("upper_bound", "(N * have_bounds)", (N * have_bounds));
+        context__.validate_dims("data initialization", "upper_bound", "vector_d", context__.to_vec((N * have_bounds)));
+        validate_non_negative_index("upper_bound", "(N * have_bounds)", (N * have_bounds));
+        upper_bound = vector_d(static_cast<Eigen::VectorXd::Index>((N * have_bounds)));
+        vals_r__ = context__.vals_r("upper_bound");
         pos__ = 0;
-        size_t upper_i_vec_lim__ = (N * have_bounds);
-        for (size_t i_vec__ = 0; i_vec__ < upper_i_vec_lim__; ++i_vec__) {
-            upper[i_vec__] = vals_r__[pos__++];
+        size_t upper_bound_i_vec_lim__ = (N * have_bounds);
+        for (size_t i_vec__ = 0; i_vec__ < upper_bound_i_vec_lim__; ++i_vec__) {
+            upper_bound[i_vec__] = vals_r__[pos__++];
         }
 
         // validate, data variables
@@ -146,7 +146,16 @@ public:
         for (int j1__ = 0U; j1__ < N; ++j1__)
             y(j1__) = vals_r__[pos__++];
         try {
-            writer__.vector_unconstrain(y);
+
+// ====== Custom Edit Begin
+if (!have_bounds) {
+  writer__.vector_unconstrain(y);
+} else {
+  for (int j1__ = 0U; j1__ < N; ++j1__)
+    writer__.scalar_lub_unconstrain(lower_bound(j1__), upper_bound(j1__), y(j1__));
+}
+// ====== Custom Edit End
+
         } catch (const std::exception& e) { 
             throw std::runtime_error(std::string("Error transforming variable y: ") + e.what());
         }
@@ -184,9 +193,33 @@ public:
         Eigen::Matrix<T__,Eigen::Dynamic,1>  y;
         (void) y;  // dummy to suppress unused var warning
         if (jacobian__)
-            y = in__.vector_constrain(N,lp__);
+
+// ====== Custom Edit Begin
+{
+  if(!have_bounds) {
+    y = in__.vector_constrain(N, lp__);
+  } else {
+    y.resize(N);
+    for (int j1__ = 0U; j1__ < N; ++j1__)
+      y(j1__) = in__.scalar_lub_constrain(lower_bound(j1__), upper_bound(j1__), lp__);
+  }
+}
+// ====== Custom Edit End
+
         else
-            y = in__.vector_constrain(N);
+
+// ====== Custom Edit Begin
+{
+  if(!have_bounds) {
+    y = in__.vector_constrain(N);
+  } else {
+    y.resize(N);
+    for (int j1__ = 0U; j1__ < N; ++j1__)
+      y(j1__) = in__.scalar_lub_constrain(lower_bound(j1__), upper_bound(j1__));
+  }
+}
+// ====== Custom Edit End
+
 
 
         // transformed parameters
@@ -208,7 +241,11 @@ public:
         try {
 
             current_statement_begin__ = 12;
-            lp_accum__.add(custom_func(y));
+
+// ====== Custom Edit Begin
+lp_accum__.add(custom_func(y));
+// ====== Custom Edit End
+
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
             // Next line prevents compiler griping about no return
@@ -259,7 +296,18 @@ public:
         static const char* function__ = "model_tmb_namespace::write_array";
         (void) function__;  // dummy to suppress unused var warning
         // read-transform, write parameters
-        vector_d y = in__.vector_constrain(N);
+
+// ====== Custom Edit Begin
+vector_d y;
+if(!have_bounds) {
+  y = in__.vector_constrain(N);
+} else {
+  y.resize(N);
+  for (int j1__ = 0U; j1__ < N; ++j1__)
+    y(j1__) = in__.scalar_lub_constrain(lower_bound(j1__), upper_bound(j1__));
+}
+// ====== Custom Edit End
+
         for (int k_0__ = 0; k_0__ < N; ++k_0__) {
             vars__.push_back(y[k_0__]);
         }
