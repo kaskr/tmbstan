@@ -26,13 +26,16 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_tmb");
-    reader.add_event(10, 10, "end", "model_tmb");
+    reader.add_event(13, 13, "end", "model_tmb");
     return reader;
 }
 
 class model_tmb : public prob_grad {
 private:
     int N;
+    int have_bounds;
+    vector_d lower;
+    vector_d upper;
 public:
     model_tmb(stan::io::var_context& context__,
         std::ostream* pstream__ = 0)
@@ -71,9 +74,36 @@ public:
         vals_i__ = context__.vals_i("N");
         pos__ = 0;
         N = vals_i__[pos__++];
+        context__.validate_dims("data initialization", "have_bounds", "int", context__.to_vec());
+        have_bounds = int(0);
+        vals_i__ = context__.vals_i("have_bounds");
+        pos__ = 0;
+        have_bounds = vals_i__[pos__++];
+        validate_non_negative_index("lower", "(N * have_bounds)", (N * have_bounds));
+        context__.validate_dims("data initialization", "lower", "vector_d", context__.to_vec((N * have_bounds)));
+        validate_non_negative_index("lower", "(N * have_bounds)", (N * have_bounds));
+        lower = vector_d(static_cast<Eigen::VectorXd::Index>((N * have_bounds)));
+        vals_r__ = context__.vals_r("lower");
+        pos__ = 0;
+        size_t lower_i_vec_lim__ = (N * have_bounds);
+        for (size_t i_vec__ = 0; i_vec__ < lower_i_vec_lim__; ++i_vec__) {
+            lower[i_vec__] = vals_r__[pos__++];
+        }
+        validate_non_negative_index("upper", "(N * have_bounds)", (N * have_bounds));
+        context__.validate_dims("data initialization", "upper", "vector_d", context__.to_vec((N * have_bounds)));
+        validate_non_negative_index("upper", "(N * have_bounds)", (N * have_bounds));
+        upper = vector_d(static_cast<Eigen::VectorXd::Index>((N * have_bounds)));
+        vals_r__ = context__.vals_r("upper");
+        pos__ = 0;
+        size_t upper_i_vec_lim__ = (N * have_bounds);
+        for (size_t i_vec__ = 0; i_vec__ < upper_i_vec_lim__; ++i_vec__) {
+            upper[i_vec__] = vals_r__[pos__++];
+        }
 
         // validate, data variables
         check_greater_or_equal(function__,"N",N,1);
+        check_greater_or_equal(function__,"have_bounds",have_bounds,0);
+        check_less_or_equal(function__,"have_bounds",have_bounds,1);
         // initialize data variables
 
         try {
@@ -177,7 +207,7 @@ public:
         // model body
         try {
 
-            current_statement_begin__ = 9;
+            current_statement_begin__ = 12;
             lp_accum__.add(custom_func(y));
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());

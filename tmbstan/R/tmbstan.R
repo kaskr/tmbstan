@@ -1,9 +1,10 @@
 setClass("tmbstanmodel",
          contains="stanmodel",
-         slots = list(par="numeric", fn="function", gr="function")
+         slots = list(par="numeric", fn="function", gr="function",
+                      lower="numeric", upper="numeric")
 )
 
-tmbstan_model <- function(par, fn, gr) {
+tmbstan_model <- function(par, fn, gr, lower=numeric(0), upper=numeric(0)) {
     model_name <- "tmb_generic"
     model_code <- "tmb_generic"
     dso <- new("cxxdso")
@@ -20,6 +21,10 @@ tmbstan_model <- function(par, fn, gr) {
     ans@par <- par
     ans@fn <- fn
     ans@gr <- gr
+    stopifnot( length(lower) == length(upper) )
+    stopifnot( length(lower) == 0 || length(lower) == length(par) )
+    ans@lower <- lower
+    ans@upper <- upper
     ans
 }
 
@@ -30,9 +35,15 @@ setMethod("sampling", "tmbstanmodel",
               gr <- object@gr
               R_callf <- quote(fn(x))
               R_callg <- quote(gr(x))
+              lower <- object@lower
+              upper <- object@upper
+              have_bounds <- as.integer(length(lower) > 0)
               env <- environment()
               .Call("set_pointers", x, R_callf, R_callg, env, PACKAGE="tmbstan")
               sampling(as(object, "stanmodel"),
-                       data = list(N = length(x)),...)
+                       data = list(N = length(x),
+                                   have_bounds=have_bounds,
+                                   lower_bound=lower,
+                                   upper_bound=upper),...)
           })
 
