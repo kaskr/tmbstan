@@ -38,6 +38,13 @@ setMethod("sampling", "tmbstanmodel",
               lower <- object@lower
               upper <- object@upper
               have_bounds <- as.integer(length(lower) > 0)
+              ## For names
+              if (is.null(names(object@par)))
+                  parnames <- rep("par", length(object@par))
+              else
+                  parnames <- names(object@par)
+              shortpar_len <- table(factor(parnames, levels=unique(parnames)))
+              shortpar_nam <- names(shortpar_len)
               env <- environment()
               .Call("set_pointers", x, R_callf, R_callg, env, PACKAGE="tmbstan")
               sampling(as(object, "stanmodel"),
