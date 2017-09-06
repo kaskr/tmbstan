@@ -86,6 +86,26 @@ if(!have_bounds) {
 }
 "
 searchReplace(pattern, replace)
+## Handle parameter names
+pattern <- "names__.resize(0);"
+replace <- "
+SEXP shortpar_nam = Rf_findVar(Rf_install(\"shortpar_nam\"), R_env);
+names__ = Rcpp::as<std::vector<std::string> >(shortpar_nam);
+return;
+"
+searchReplace(pattern, replace)
+pattern <- "dimss__.resize(0);"
+replace <- "
+SEXP shortpar_len = Rf_findVar(Rf_install(\"shortpar_len\"), R_env);
+for(int i=0; i<LENGTH(shortpar_len); i++) {
+  std::vector<size_t> dims__;
+  dims__.resize(0);
+  dims__.push_back(INTEGER(shortpar_len)[i]);
+  dimss__.push_back(dims__);
+}
+return;
+"
+searchReplace(pattern, replace)
 
 ## Write
 writeLines(mod, outfile)
