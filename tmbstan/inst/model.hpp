@@ -270,13 +270,30 @@ lp_accum__.add(custom_func(y));
 
 
     void get_param_names(std::vector<std::string>& names__) const {
-        names__.resize(0);
+
+// ====== Custom Edit Begin
+SEXP shortpar_nam = Rf_findVar(Rf_install("shortpar_nam"), R_env);
+names__ = Rcpp::as<std::vector<std::string> >(shortpar_nam);
+return;
+// ====== Custom Edit End
+
         names__.push_back("y");
     }
 
 
     void get_dims(std::vector<std::vector<size_t> >& dimss__) const {
-        dimss__.resize(0);
+
+// ====== Custom Edit Begin
+SEXP shortpar_len = Rf_findVar(Rf_install("shortpar_len"), R_env);
+for(int i=0; i<LENGTH(shortpar_len); i++) {
+  std::vector<size_t> dims__;
+  dims__.resize(0);
+  dims__.push_back(INTEGER(shortpar_len)[i]);
+  dimss__.push_back(dims__);
+}
+return;
+// ====== Custom Edit End
+
         std::vector<size_t> dims__;
         dims__.resize(0);
         dims__.push_back(N);
