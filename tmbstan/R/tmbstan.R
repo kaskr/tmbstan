@@ -54,3 +54,47 @@ setMethod("sampling", "tmbstanmodel",
                                    upper_bound=upper),...)
           })
 
+
+## TMB interface to STAN
+tmbstan <- function(obj,
+                    lower=numeric(0), upper=numeric(0),
+                    ...,
+                    marginal=FALSE, silent=TRUE) {
+    ## FIXME: Remember to restore.on.exit
+    if (silent) obj$env$beSilent()
+    stopifnot(length(lower) == length(upper))
+    if (marginal) {
+        par <- obj$env$last.par.best[-obj$env$random]
+        fn <- obj$fn
+        gr <- obj$gr
+        obj$env$random.start <- expression({
+            cand <- list(last.par.best[random], last.par[random])
+            cand[[which.min(sapply(cand, f0))]]
+        })
+    } else {
+        par <- obj$env$last.par.best
+        fn <- obj$env$f
+        gr <- function(x)obj$env$f(x, order=1)
+        if (length(lower) == length(obj$par)) {
+            ## We allow lower/upper be shorter than the full par
+            lower. <- lower; upper. <- upper
+            lower <- par * 0 - Inf
+            upper <- par * 0 + Inf
+            lower[-obj$env$random] <- lower.
+            upper[-obj$env$random] <- upper.
+        }
+    }
+    mod <- tmbstan_model(par, fn, gr, lower, upper)
+    ## Initialization of mcmc. Options:
+    ##   1. Mode if available (last.par.best)
+    ##   2. Sample from gaussian posterior
+    ##   3. rstan defaults (rnorm I think ?)
+    init <- list()
+    init[[names(par)[1]]] <- numeric()  # Workaround: rstan doesn't
+                                        # call 'transfom_inits' if
+                                        # none of the 'get_param_names'
+                                        # are present in the list
+    init$y <- par ## The actual init parameter
+    fun_init <- function() init
+    sampling(mod, init = fun_init, ...)
+}
