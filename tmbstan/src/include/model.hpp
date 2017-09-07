@@ -288,7 +288,8 @@ SEXP shortpar_len = Rf_findVar(Rf_install("shortpar_len"), R_env);
 for(int i=0; i<LENGTH(shortpar_len); i++) {
   std::vector<size_t> dims__;
   dims__.resize(0);
-  dims__.push_back(INTEGER(shortpar_len)[i]);
+  int len_i = INTEGER(shortpar_len)[i];
+  if (len_i > 1) dims__.push_back(len_i);
   dimss__.push_back(dims__);
 }
 return;
