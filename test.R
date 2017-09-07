@@ -106,3 +106,18 @@ par <- rep(c(x=0),2)
 mod3. <- tmbstan_model(par, fn, gr, lower=c(-2,-1), upper=c(0,Inf))
 fit3. <- sampling(mod3., seed=1, chains=1, iter=iter)
 compare( fit3, fit3.)
+
+######################################################################
+##
+## Example 4: Test HMC for previous example
+##
+######################################################################
+
+fit4 <- sampling(mod3, seed=1, chains=1, iter=iter,
+                 data = list(),
+                 algorithm="HMC")
+
+fit4. <- sampling(mod3., seed=1, chains=1, iter=iter,
+                  algorithm="HMC")
+
+compare( fit4, fit4.)
