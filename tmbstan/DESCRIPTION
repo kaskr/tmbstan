@@ -9,5 +9,5 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Depends: rstan
 LinkingTo: StanHeaders (>= 2.14.0), rstan (>= 2.14.1), BH (>= 1.62.0),
-        Rcpp (>= 0.12.0), RcppEigen
+        Rcpp (>= 0.12.0), RcppEigen, TMB
 NeedsCompilation: yes

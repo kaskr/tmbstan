@@ -1,7 +1,7 @@
 setClass("tmbstanmodel",
          contains="stanmodel",
          slots = list(par="numeric", fn="function", gr="function",
-                      lower="numeric", upper="numeric")
+                      lower="numeric", upper="numeric",ptr="externalptr")
 )
 
 tmbstan_model <- function(par, fn, gr, lower=numeric(0), upper=numeric(0)) {
@@ -46,7 +46,7 @@ setMethod("sampling", "tmbstanmodel",
               shortpar_len <- table(factor(parnames, levels=unique(parnames)))
               shortpar_nam <- names(shortpar_len)
               env <- environment()
-              .Call("set_pointers", x, R_callf, R_callg, env, PACKAGE="tmbstan")
+              .Call("set_pointers", x, R_callf, R_callg, env, object@ptr, PACKAGE="tmbstan")
               sampling(as(object, "stanmodel"),
                        data = list(N = length(x),
                                    have_bounds=have_bounds,
@@ -73,8 +73,8 @@ tmbstan <- function(obj,
         })
     } else {
         par <- obj$env$last.par.best
-        fn <- obj$env$f
-        gr <- function(x)obj$env$f(x, order=1)
+        fn <- function() NULL
+        gr <- function() NULL
         if (length(lower) == length(obj$par)) {
             ## We allow lower/upper be shorter than the full par
             lower. <- lower; upper. <- upper
@@ -85,6 +85,9 @@ tmbstan <- function(obj,
         }
     }
     mod <- tmbstan_model(par, fn, gr, lower, upper)
+    if (!marginal) {
+        mod@ptr <- obj$env$ADFun$ptr
+    }
     ## Initialization of mcmc. Options:
     ##   1. Mode if available (last.par.best)
     ##   2. Sample from gaussian posterior
