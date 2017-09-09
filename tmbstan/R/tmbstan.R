@@ -59,7 +59,7 @@ setMethod("sampling", "tmbstanmodel",
 tmbstan <- function(obj,
                     lower=numeric(0), upper=numeric(0),
                     ...,
-                    marginal=FALSE, silent=TRUE) {
+                    marginal=FALSE, silent=TRUE, debug=FALSE) {
     ## FIXME: Remember to restore.on.exit
     if (silent) obj$env$beSilent()
     stopifnot(length(lower) == length(upper))
@@ -73,8 +73,8 @@ tmbstan <- function(obj,
         })
     } else {
         par <- obj$env$last.par.best
-        fn <- function() NULL
-        gr <- function() NULL
+        fn <- obj$env$f
+        gr <- function(x) obj$env$f(x, order=1)
         if (length(lower) == length(obj$par)) {
             ## We allow lower/upper be shorter than the full par
             lower. <- lower; upper. <- upper
@@ -85,7 +85,7 @@ tmbstan <- function(obj,
         }
     }
     mod <- tmbstan_model(par, fn, gr, lower, upper)
-    if (!marginal) {
+    if ( (!marginal) && (!debug) ) {
         mod@ptr <- obj$env$ADFun$ptr
     }
     ## Initialization of mcmc. Options:
