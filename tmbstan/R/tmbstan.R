@@ -60,7 +60,20 @@ tmbstan <- function(obj,
                     lower=numeric(0), upper=numeric(0),
                     ...,
                     marginal=FALSE, silent=TRUE, debug=FALSE) {
-    ## FIXME: Remember to restore.on.exit
+
+    ## Cleanup 'obj' when we exit from this function:
+    restore.on.exit <- c("last.par.best",
+                         "random.start",
+                         "value.best",
+                         "last.par",
+                         "inner.control",
+                         "tracemgc")
+    oldvars <- sapply(restore.on.exit, get, envir=obj$env, simplify=FALSE)
+    restore.oldvars <- function(){
+        for(var in names(oldvars)) assign(var, oldvars[[var]], envir=obj$env)
+    }
+    on.exit(restore.oldvars())
+
     if (silent) obj$env$beSilent()
     stopifnot(length(lower) == length(upper))
     if (marginal) {
