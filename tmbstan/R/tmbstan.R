@@ -56,6 +56,20 @@ setMethod("sampling", "tmbstanmodel",
 
 
 ## TMB interface to STAN
+##
+## init: Differs from rstan. If unspecified, the best encountered
+## parameter is used (The MLE with corresponding posterior modes if an
+## optimization has been carried out - otherwise simply obj$par). We also
+## allow to pass a single numeric, or a list of numerics with same length
+## as the number of chains. Numeric vectors should have the same length
+## as the number of sampled parameters and names are ignored. Parameters
+## that do not follow the previous scheme (e.g. characters) are passed on
+## to rstan unchanged. If in doubt, use rstan::get_inits to inspect the
+## applied initial values.
+##
+## marginal: Apply the Laplace approximation to 'random' subset of
+## parameters ?
+
 tmbstan <- function(obj,
                     lower=numeric(0), upper=numeric(0),
                     ...,
@@ -101,16 +115,47 @@ tmbstan <- function(obj,
     if ( (!marginal) && (!debug) ) {
         mod@ptr <- obj$env$ADFun$ptr
     }
+
+    ## Args for call to 'sampling'
+    args <- list(object = mod, ...)
+
     ## Initialization of mcmc. Options:
     ##   1. Mode if available (last.par.best)
     ##   2. Sample from gaussian posterior
     ##   3. rstan defaults (rnorm I think ?)
-    init <- list()
-    init[[names(par)[1]]] <- numeric()  # Workaround: rstan doesn't
-                                        # call 'transfom_inits' if
-                                        # none of the 'get_param_names'
-                                        # are present in the list
-    init$y <- par ## The actual init parameter
-    fun_init <- function() init
-    sampling(mod, init = fun_init, ...)
+    initSanitizer <- function(x) {
+        if (is.list(x)) {
+            x <- unlist(x) ## FIXME: We could do better by accounting for list names
+            initSanitizer(x)
+        }
+        else if (is.numeric(x)) {
+            if(length(x) != length(par))
+                stop("Detected initial parameter of the wrong length.")
+            init <- list()
+            ## Workaround: rstan doesn't call 'transfom_inits' if
+            ## none of the 'get_param_names' are present in the list
+            init[[names(par)[1]]] <- numeric()
+            ## Set the actual init parameter (Name 'y' is used by the generic model.hpp)
+            init$y <- x
+            init
+        }
+        else
+            x
+    }
+    chains <- args$chains
+    if (is.null(chains)) chains <- 4 ## rstan default
+    if (is.null(args$init)) {
+        ## Set our default
+        args$init <- list(par)
+    }
+    if (!is.null(args$init)) {
+        ## User specified initializer list - sanitize
+        if (is.numeric(args$init))
+            args$init <- list(args$init)
+        if (is.list(args$init))
+            args$init <- lapply(args$init, initSanitizer)
+        args$init <- rep(args$init, length.out=chains)
+    }
+
+    do.call("sampling", args)
 }
