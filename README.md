@@ -26,19 +26,9 @@ par <- rep(0,5)
 mod2 <- tmbstan_model(par,fn,gr)
 fit2 <- sampling(mod2, seed=1)
 
-## Example 3
+## Example 3 (Simple tmb interface to stan)
+library(tmbstan)
 library(TMB)
 TMB::runExample("simple")
-obj <- MakeADFun(data=list(x=x, B=B, A=A),
-    parameters=list(u=u*0, beta=beta*0, logsdu=1, logsd0=1),
-    random=NULL, DLL="simple", silent=TRUE)
-mod3 <- tmbstan_model(obj$par, obj$fn, obj$gr)
-system.time(fit3 <- sampling(mod3, seed=1))
-
-## Example 4
-## (Speed up previous by not repeating the forward sweep)
-f <- function(x)obj$env$f(x)
-g <- function(x)obj$env$f(x,order=1,doforward=0)
-mod4 <- tmbstan_model(obj$par, f, g)
-system.time(fit4 <- sampling(mod4, seed=1))
+system.time(fit <- tmbstan(obj))
 ```
