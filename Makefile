@@ -3,3 +3,6 @@ install:
 
 update-stan-model:
 	R --slave < autogen.R
+
+test:
+	R --slave < test.R

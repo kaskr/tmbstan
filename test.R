@@ -6,6 +6,7 @@
 
 library(rstan)
 library(tmbstan)
+library(TMB)
 verbose <- TRUE
 compare <- function(x, y) {
     d <- as.array(x) - as.array(y)
@@ -21,6 +22,7 @@ compare <- function(x, y) {
 ##
 ######################################################################
 
+## Stan
 stancode <- '
 data {
 int<lower=1> N;
@@ -39,6 +41,7 @@ iter <- 50
 fit1 <- sampling(mod1, seed=1, chains=1, iter=iter,
                  data = list(N = 5) )
 
+## Method 1: Plugin R function
 fn <- function(x).5*sum(x*x)
 gr <- function(x)x
 par <- rep(c(x=0),5)
@@ -46,6 +49,27 @@ mod1. <- tmbstan_model(par, fn, gr)
 fit1. <- sampling(mod1., seed=1, chains=1, iter=iter)
 
 compare( fit1, fit1.)
+
+## Method 2: Plugin TMB function
+tmbcode <- '
+#include <TMB.hpp>
+template<class Type>
+Type objective_function<Type>::operator() ()
+{
+  PARAMETER_VECTOR(y);
+  return .5 * (y * y).sum();
+}
+'
+if (!file.exists("tmbcode.cpp"))
+    cat(tmbcode, file="tmbcode.cpp")
+compile("tmbcode.cpp")
+dyn.load(dynlib("tmbcode"))
+obj <- MakeADFun(data=list(),
+                 parameters=list(y=rep(0,5)),
+                 DLL="tmbcode")
+fit1.. <- tmbstan(obj, seed=1, chains=1, iter=iter, init="random")
+
+compare( fit1, fit1..)
 
 ######################################################################
 ##
