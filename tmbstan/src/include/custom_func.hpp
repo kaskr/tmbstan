@@ -29,7 +29,7 @@ namespace stan {
         if ( ! R_ExternalPtrAddr(R_ptr) ) { // Case 1
           // Set evaluation point
           double* px = REAL(R_x);
-          for (size_t i = 0; i < xvar.size(); ++i) {
+          for (int i = 0; i < xvar.size(); ++i) {
             px[i] = xvar(i).val();
           }
           SEXP y;
@@ -40,7 +40,7 @@ namespace stan {
         } else {                            // Case 2
           vector_double x(xvar.size());
           vector_double y(1);
-          for (size_t i = 0; i < xvar.size(); ++i) {
+          for (int i = 0; i < xvar.size(); ++i) {
             x(i) = xvar(i).val();
           }
           tmb_forward(R_ptr, x, y);
@@ -53,13 +53,13 @@ namespace stan {
         if ( ! R_ExternalPtrAddr(R_ptr) ) {
           // Set evaluation point
           double* px = REAL(R_x);
-          for (size_t i = 0; i < x_.size(); ++i) {
+          for (int i = 0; i < x_.size(); ++i) {
             px[i] = x_(i);
           }
           SEXP y;
           PROTECT( y = Rf_eval(R_gcall, R_env) );
           double* py = REAL(y);
-          for (size_t i = 0; i < x_.size(); ++i) {
+          for (int i = 0; i < x_.size(); ++i) {
             g(i) = -py[i];
           }
           UNPROTECT(1);
@@ -76,10 +76,10 @@ namespace stan {
         void chain() {
           vector_double x(size_);
           vector_double g(size_);
-          for (size_t i = 0; i < size_; ++i)
+          for (int i = 0; i < size_; ++i)
             x(i) = vis_[i]->val_;
           gradient_custom_func_as_double(x, g);
-          for (size_t i = 0; i < size_; ++i) {
+          for (int i = 0; i < size_; ++i) {
             vis_[i]->adj_ += adj_ * g(i);
           }
         }
@@ -91,7 +91,7 @@ namespace stan {
     inline double custom_func(const vector_double& x_) {
       if ( ! R_ExternalPtrAddr(R_ptr) ) {
         double* px = REAL(R_x);
-        for (EIGEN_DEFAULT_DENSE_INDEX_TYPE i = 0; i < x_.size(); ++i) {
+        for (int i = 0; i < x_.size(); ++i) {
           px[i] = x_(i);
         }
         SEXP y;
