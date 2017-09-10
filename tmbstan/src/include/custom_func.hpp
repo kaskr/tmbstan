@@ -76,10 +76,10 @@ namespace stan {
         void chain() {
           vector_double x(size_);
           vector_double g(size_);
-          for (int i = 0; i < size_; ++i)
+          for (int i = 0; i < (int) size_; ++i)
             x(i) = vis_[i]->val_;
           gradient_custom_func_as_double(x, g);
-          for (int i = 0; i < size_; ++i) {
+          for (int i = 0; i < (int) size_; ++i) {
             vis_[i]->adj_ += adj_ * g(i);
           }
         }
