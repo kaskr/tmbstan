@@ -1,9 +1,12 @@
+##' @importClassesFrom rstan stanmodel
+##' @importFrom methods setClass new
 setClass("tmbstanmodel",
          contains="stanmodel",
          slots = list(par="numeric", fn="function", gr="function",
                       lower="numeric", upper="numeric",ptr="externalptr")
 )
 
+## ##' @importClassesFrom inline cxxdso
 tmbstan_model <- function(par, fn, gr, lower=numeric(0), upper=numeric(0)) {
     model_name <- "tmb_generic"
     model_code <- "tmb_generic"
@@ -28,6 +31,8 @@ tmbstan_model <- function(par, fn, gr, lower=numeric(0), upper=numeric(0)) {
     ans
 }
 
+##' @importMethodsFrom rstan sampling
+##' @useDynLib tmbstan, .registration=TRUE
 setMethod("sampling", "tmbstanmodel",
           function(object, ...) {
               x <- numeric(length(object@par))
@@ -55,25 +60,63 @@ setMethod("sampling", "tmbstanmodel",
           })
 
 
-## TMB interface to STAN
-##
-## init: Differs from rstan. If unspecified, the best encountered
-## parameter is used (The MLE with corresponding posterior modes if an
-## optimization has been carried out - otherwise simply obj$par). We also
-## allow to pass a single numeric, or a list of numerics with same length
-## as the number of chains. Numeric vectors should have the same length
-## as the number of sampled parameters and names are ignored. Parameters
-## that do not follow the previous scheme (e.g. characters) are passed on
-## to rstan unchanged. If in doubt, use rstan::get_inits to inspect the
-## applied initial values.
-##
-## marginal: Apply the Laplace approximation to 'random' subset of
-## parameters ?
-
+##' Draw MCMC samples from a TMB model object using STAN
+##' @param obj TMB model object.
+##' @param ... Passed to \code{rstan::sampling} with some modifications - see details.
+##' @param lower Vector of lower parameter bounds.
+##' @param upper Vector of upper parameter bounds.
+##' @param laplace Apply the Laplace approximation to \code{random} subset of parameters ? The default disables the Laplace approximation.
+##' @param silent Be silent during samling ?
+##' @param debug Should not be used.
+##' @export
+##' @return Object of class \code{stanfit}
+##' @details
+##' \code{tmbstan} works for models with or without random effects.
+##'
+##' By default a full Bayesian analysis is carried out, i.e. both
+##' parameters and random effects are sampled using MCMC. Models with
+##' random effects will thus have the Laplace approximation disabled. It
+##' is possible to mix the Laplace approximation with MCMC by setting
+##' \code{laplace=TRUE}.
+##' All methods provided by the \code{rstan} package can be applied to a
+##' fitted object. Get a complete list using
+##' \code{methods(class="stanfit")}.
+##'
+##' The function arguments \code{...} are passed to \code{rstan}s
+##' fitting function. For a complete list see \code{?rstan::sampling}. A
+##' few notable arguments are:
+##' \itemize{
+##' \item \code{chains} The number of chains.
+##' \item \code{iter}   The number of iterations.
+##' \item \code{init}   Initial values for the sampler.
+##' Differs slightly from \code{rstan}. If unspecified, the best encountered
+##' parameter \code{obj$env$last.par.best} is used (The MLE with corresponding posterior modes if an
+##' optimization has been carried out - otherwise simply \code{obj$par}). We also
+##' allow to pass a single numeric, or a list of numerics with same length
+##' as the number of chains. Numeric vectors should have the same length
+##' as the number of sampled parameters and names are currently ignored. Parameters
+##' that do not follow the previous scheme (e.g. characters) are passed on
+##' to \code{rstan} unchanged. If in doubt, use \code{rstan::get_inits} to inspect the
+##' applied initial values.
+##' \item \code{seed} Random seed.
+##' }
+##' @importFrom TMB runExample
+##' @examples
+##' runExample("simple")
+##' fit <- tmbstan(obj, chains=1)
+##'
+##' ## The avilable methods are
+##' methods(class="stanfit")
+##'
+##' ## Pairs plot
+##' pairs(fit, pars=names(obj$par))
+##'
+##' ## Trace plot
+##' traceplot(fit, pars=names(obj$par), inc_warmup=TRUE)
 tmbstan <- function(obj,
-                    lower=numeric(0), upper=numeric(0),
                     ...,
-                    marginal=FALSE, silent=TRUE, debug=FALSE) {
+                    lower=numeric(0), upper=numeric(0),
+                    laplace=FALSE, silent=TRUE, debug=FALSE) {
 
     ## Cleanup 'obj' when we exit from this function:
     restore.on.exit <- c("last.par.best",
@@ -90,7 +133,7 @@ tmbstan <- function(obj,
 
     if (silent) obj$env$beSilent()
     stopifnot(length(lower) == length(upper))
-    if (marginal) {
+    if (laplace) {
         par <- obj$env$last.par.best[-obj$env$random]
         fn <- obj$fn
         gr <- obj$gr
@@ -113,7 +156,7 @@ tmbstan <- function(obj,
         }
     }
     mod <- tmbstan_model(par, fn, gr, lower, upper)
-    if ( (!marginal) && (!debug) ) {
+    if ( (!laplace) && (!debug) ) {
         mod@ptr <- obj$env$ADFun$ptr
     }
 
