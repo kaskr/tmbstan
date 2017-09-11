@@ -102,7 +102,8 @@ tmbstan <- function(obj,
         par <- obj$env$last.par.best
         fn <- obj$env$f
         gr <- function(x) obj$env$f(x, order=1)
-        if (length(lower) == length(obj$par)) {
+        if (length(lower) == length(obj$par) &&
+            !is.null(obj$env$random)) {
             ## We allow lower/upper be shorter than the full par
             lower. <- lower; upper. <- upper
             lower <- par * 0 - Inf
@@ -154,7 +155,8 @@ tmbstan <- function(obj,
             args$init <- list(args$init)
         if (is.list(args$init))
             args$init <- lapply(args$init, initSanitizer)
-        args$init <- rep(args$init, length.out=chains)
+        if (is.list(args$init))
+            args$init <- rep(args$init, length.out=chains)
     }
 
     do.call("sampling", args)
