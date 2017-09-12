@@ -32,6 +32,7 @@ tmbstan_model <- function(par, fn, gr, lower=numeric(0), upper=numeric(0)) {
 }
 
 ##' @importMethodsFrom rstan sampling
+##' @importFrom methods as
 ##' @useDynLib tmbstan, .registration=TRUE
 setMethod("sampling", "tmbstanmodel",
           function(object, ...) {
@@ -108,8 +109,10 @@ setMethod("sampling", "tmbstanmodel",
 ##' ## The avilable methods are
 ##' methods(class="stanfit")
 ##'
+##' \dontrun{
 ##' ## Pairs plot
 ##' pairs(fit, pars=names(obj$par))
+##' }
 ##'
 ##' ## Trace plot
 ##' traceplot(fit, pars=names(obj$par), inc_warmup=TRUE)
