@@ -12,19 +12,17 @@ update-stan-model:
 	R --slave < autogen.R
 
 test:
-	R --slave < test.R
+	R --vanilla < test.R
 
 doc-update: $(PACKAGE)/R/*.R
 	echo "library(roxygen2);roxygenize(\"$(PACKAGE)\",roclets = c(\"namespace\"))" | $(R) --slave
 	echo "library(roxygen2);roxygenize(\"$(PACKAGE)\",roclets = c(\"collate\", \"rd\"))" | $(R) --slave
 
-build-package:
+build:
 	$(R) CMD build --resave-data=no $(PACKAGE)
 
 check:
-	make doc-update
-	make build-package
-	$(R) CMD check $(TARBALL)
+	$(R) CMD check --as-cran $(TARBALL)
 
 pdf:
 	rm -f $(PACKAGE).pdf

@@ -4,10 +4,8 @@
 ##
 ######################################################################
 
-library(rstan)
 library(tmbstan)
-library(TMB)
-verbose <- TRUE
+verbose <- FALSE
 compare <- function(x, y) {
     d <- as.array(x) - as.array(y)
     cat("MAX(ABS(DIFFERENCE)))\n")
@@ -15,6 +13,9 @@ compare <- function(x, y) {
     stopifnot(max(abs(d)) < sqrt(.Machine$double.eps))
     cat("PASSED\n")
 }
+iter <- 2000 ## rstan default
+chains <- 4  ## rstan default
+seed <- 1    ## Use identical seeds
 
 ######################################################################
 ##
@@ -37,20 +38,10 @@ y ~ normal(0,1);
 
 mod1 <- stan_model(model_code = stancode, model_name="stan",
                    verbose=verbose)
-iter <- 50
-fit1 <- sampling(mod1, seed=1, chains=1, iter=iter,
+fit1 <- sampling(mod1, seed=seed, chains=chains, iter=iter,
                  data = list(N = 5) )
 
-## Method 1: Plugin R function
-fn <- function(x).5*sum(x*x)
-gr <- function(x)x
-par <- rep(c(x=0),5)
-mod1. <- tmbstan_model(par, fn, gr)
-fit1. <- sampling(mod1., seed=1, chains=1, iter=iter)
-
-compare( fit1, fit1.)
-
-## Method 2: Plugin TMB function
+## TMB
 tmbcode <- '
 #include <TMB.hpp>
 template<class Type>
@@ -67,9 +58,11 @@ dyn.load(dynlib("tmbcode"))
 obj <- MakeADFun(data=list(),
                  parameters=list(y=rep(0,5)),
                  DLL="tmbcode")
-fit1.. <- tmbstan(obj, seed=1, chains=1, iter=iter, init="random")
+fit1. <- tmbstan(obj, seed=seed, chains=chains, iter=iter, init="random")
 
-compare( fit1, fit1..)
+## Compare output
+compare(fit1, fit1.)
+
 
 ######################################################################
 ##
@@ -77,6 +70,7 @@ compare( fit1, fit1..)
 ##
 ######################################################################
 
+## Stan
 stancode <- '
 parameters {
 real<lower=-2,upper=0> y1;
@@ -90,16 +84,18 @@ y2 ~ normal(0,1);
 
 mod2 <- stan_model(model_code = stancode, model_name="stan",
                    verbose=verbose)
-iter <- 50
-fit2 <- sampling(mod2, seed=1, chains=1, iter=iter,
+fit2 <- sampling(mod2, seed=seed, chains=chains, iter=iter,
                  data = list() )
 
-fn <- function(x).5*sum(x*x)
-gr <- function(x)x
-par <- rep(c(x=0),2)
-mod2. <- tmbstan_model(par, fn, gr, lower=c(-2,-1), upper=c(0,1))
-fit2. <- sampling(mod2., seed=1, chains=1, iter=iter)
-compare( fit2, fit2.)
+## TMB
+obj <- MakeADFun(data=list(),
+                 parameters=list(y=rep(0,2)),
+                 DLL="tmbcode")
+fit2. <- tmbstan(obj, seed=seed, chains=chains, iter=iter,
+                 lower=c(-2,-1), upper=c(0,1), init="random")
+
+## Compare output
+compare(fit2, fit2.)
 
 ######################################################################
 ##
@@ -120,16 +116,17 @@ y2 ~ normal(0,1);
 
 mod3 <- stan_model(model_code = stancode, model_name="stan",
                    verbose=verbose)
-iter <- 50
-fit3 <- sampling(mod3, seed=1, chains=1, iter=iter,
+fit3 <- sampling(mod3, seed=seed, chains=chains, iter=iter,
                  data = list() )
+## TMB
+obj <- MakeADFun(data=list(),
+                 parameters=list(y=rep(0,2)),
+                 DLL="tmbcode")
+fit3. <- tmbstan(obj, seed=seed, chains=chains, iter=iter,
+                 lower=c(-2,-1), upper=c(0,Inf), init="random")
 
-fn <- function(x).5*sum(x*x)
-gr <- function(x)x
-par <- rep(c(x=0),2)
-mod3. <- tmbstan_model(par, fn, gr, lower=c(-2,-1), upper=c(0,Inf))
-fit3. <- sampling(mod3., seed=1, chains=1, iter=iter)
-compare( fit3, fit3.)
+## Compare output
+compare(fit3, fit3.)
 
 ######################################################################
 ##
@@ -137,11 +134,13 @@ compare( fit3, fit3.)
 ##
 ######################################################################
 
-fit4 <- sampling(mod3, seed=1, chains=1, iter=iter,
+fit4 <- sampling(mod3, seed=seed, chains=chains, iter=iter,
                  data = list(),
                  algorithm="HMC")
 
-fit4. <- sampling(mod3., seed=1, chains=1, iter=iter,
-                  algorithm="HMC")
+fit4. <- tmbstan(obj, seed=seed, chains=chains, iter=iter,
+                 lower=c(-2,-1), upper=c(0,Inf), init="random",
+                 algorithm="HMC")
 
-compare( fit4, fit4.)
+## Compare output
+compare(fit4, fit4.)
