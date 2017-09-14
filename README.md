@@ -10,6 +10,14 @@ MCMC sampling from TMB model object using STAN.
 devtools::install_github("kaskr/tmbstan", subdir="tmbstan")
 ```
 
+The development version of TMB is required
+
+```r
+devtools::install_github("kaskr/adcomp", subdir="TMB")
+```
+
+Shared object files must be re-compiled using the new version.
+
 ## Examples
 
 ```r
