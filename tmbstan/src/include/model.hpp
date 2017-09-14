@@ -243,7 +243,7 @@ if (!have_bounds) {
             current_statement_begin__ = 12;
 
 // ====== Custom Edit Begin
-lp_accum__.add(custom_func(y));
+lp_accum__.add(custom_func::custom_func(y));
 // ====== Custom Edit End
 
         } catch (const std::exception& e) {
@@ -272,7 +272,7 @@ lp_accum__.add(custom_func(y));
     void get_param_names(std::vector<std::string>& names__) const {
 
 // ====== Custom Edit Begin
-SEXP shortpar_nam = Rf_findVar(Rf_install("shortpar_nam"), R_env);
+SEXP shortpar_nam = Rf_findVar(Rf_install("shortpar_nam"), custom_func::R_env);
 names__ = Rcpp::as<std::vector<std::string> >(shortpar_nam);
 return;
 // ====== Custom Edit End
@@ -284,7 +284,7 @@ return;
     void get_dims(std::vector<std::vector<size_t> >& dimss__) const {
 
 // ====== Custom Edit Begin
-SEXP shortpar_len = Rf_findVar(Rf_install("shortpar_len"), R_env);
+SEXP shortpar_len = Rf_findVar(Rf_install("shortpar_len"), custom_func::R_env);
 for(int i=0; i<LENGTH(shortpar_len); i++) {
   std::vector<size_t> dims__;
   dims__.resize(0);

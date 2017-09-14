@@ -43,7 +43,7 @@ searchReplace <- function(pattern, replace) {
 }
 pattern <- "lp_accum__.add(normal_log<propto__>(y, 0, 1));"
 replace <- "
-lp_accum__.add(custom_func(y));
+lp_accum__.add(custom_func::custom_func(y));
 "
 searchReplace(pattern, replace)
 
@@ -89,14 +89,14 @@ searchReplace(pattern, replace)
 ## Handle parameter names
 pattern <- "names__.resize(0);"
 replace <- "
-SEXP shortpar_nam = Rf_findVar(Rf_install(\"shortpar_nam\"), R_env);
+SEXP shortpar_nam = Rf_findVar(Rf_install(\"shortpar_nam\"), custom_func::R_env);
 names__ = Rcpp::as<std::vector<std::string> >(shortpar_nam);
 return;
 "
 searchReplace(pattern, replace)
 pattern <- "dimss__.resize(0);"
 replace <- "
-SEXP shortpar_len = Rf_findVar(Rf_install(\"shortpar_len\"), R_env);
+SEXP shortpar_len = Rf_findVar(Rf_install(\"shortpar_len\"), custom_func::R_env);
 for(int i=0; i<LENGTH(shortpar_len); i++) {
   std::vector<size_t> dims__;
   dims__.resize(0);

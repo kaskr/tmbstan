@@ -3,7 +3,8 @@
 setClass("tmbstanmodel",
          contains="stanmodel",
          slots = list(par="numeric", fn="function", gr="function",
-                      lower="numeric", upper="numeric",ptr="externalptr")
+                      lower="numeric", upper="numeric",
+                      ptr="externalptr", DLL="character")
 )
 
 ## ##' @importClassesFrom inline cxxdso
@@ -52,7 +53,8 @@ setMethod("sampling", "tmbstanmodel",
               shortpar_len <- table(factor(parnames, levels=unique(parnames)))
               shortpar_nam <- names(shortpar_len)
               env <- environment()
-              .Call("set_pointers", x, R_callf, R_callg, env, object@ptr, PACKAGE="tmbstan")
+              .Call("set_pointers", x, R_callf, R_callg, env,
+                    object@ptr, object@DLL, PACKAGE="tmbstan")
               sampling(as(object, "stanmodel"),
                        data = list(N = length(x),
                                    have_bounds=have_bounds,
@@ -161,6 +163,7 @@ tmbstan <- function(obj,
     mod <- tmbstan_model(par, fn, gr, lower, upper)
     if ( (!laplace) && (!debug) ) {
         mod@ptr <- obj$env$ADFun$ptr
+        mod@DLL <- obj$env$DLL
     }
 
     ## Args for call to 'sampling'
