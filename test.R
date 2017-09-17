@@ -63,6 +63,18 @@ fit1. <- tmbstan(obj, seed=seed, chains=chains, iter=iter, init="random")
 ## Compare output
 compare(fit1, fit1.)
 
+######################################################################
+##
+## Example 1b: Specify inital values for previous example
+##
+######################################################################
+
+fit1b <- sampling(mod1, seed=seed, chains=1, iter=iter,
+                  data = list(N = 5),
+                  init = list(list(y=c(-2:2))) )
+fit1b. <- tmbstan(obj, seed=seed, chains=1, iter=iter,
+                  init=list(list(c(-2:2))) )
+compare(fit1b, fit1b.)
 
 ######################################################################
 ##
@@ -127,6 +139,21 @@ fit3. <- tmbstan(obj, seed=seed, chains=chains, iter=iter,
 
 ## Compare output
 compare(fit3, fit3.)
+
+
+######################################################################
+##
+## Example 3b: Specify inital values for previous example
+##
+######################################################################
+
+fit3b <- sampling(mod3, seed=seed, chains=1, iter=iter,
+                  data = list(N = 5),
+                  init = list(list(y1=-1,y2=0)) )
+fit3b. <- tmbstan(obj, seed=seed, chains=1, iter=iter,
+                  lower=c(-2,-1), upper=c(0,Inf),
+                  init=list(list(c(-1,0))) )
+compare(fit3b, fit3b.)
 
 ######################################################################
 ##
