@@ -171,3 +171,55 @@ fit4. <- tmbstan(obj, seed=seed, chains=chains, iter=iter,
 
 ## Compare output
 compare(fit4, fit4.)
+
+######################################################################
+##
+## Example 5: TMB's simple example implemented in Stan
+##
+######################################################################
+
+runExample("simple")
+
+data <- obj$env$data
+data$A <- as.matrix(data$A)
+data$B <- as.matrix(data$B)
+data$ncolA <- ncol(data$A)
+data$ncolB <- ncol(data$B)
+data$nx <- length(data$x)
+
+## Stan
+stancode <- '
+data {
+int nx;
+int ncolA;
+int ncolB;
+vector[nx] x;
+matrix[nx,ncolA] A;
+matrix[nx,ncolB] B;
+}
+parameters {
+vector[ncolB] u;
+vector[ncolA] beta;
+real logsdu;
+real logsd0;
+}
+model {
+vector[nx] pred;
+pred = A * beta + B * u;
+u ~ normal(0,exp(logsdu));
+x ~ normal(pred,exp(logsd0));
+}
+'
+mod5 <- stan_model(model_code = stancode, model_name="stan",
+                   verbose=verbose)
+
+fit5 <- sampling(mod5, seed=1, chains=1, iter=10000,
+                 data = data )
+
+fit5. <- tmbstan(obj, seed=1, chains=1, iter=10000, init="random")
+
+tab5  <- summary(fit5, pars=names(obj$par))$c_summary
+tab5. <- summary(fit5.,pars=names(obj$par))$c_summary
+diff <- (tab5-tab5.)[,c("mean", "sd", "25%", "50%", "75%"),]
+print(diff)
+stopifnot( max(abs(diff)) < .01 )
