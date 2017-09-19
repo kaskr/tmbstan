@@ -1,11 +1,11 @@
 Package: tmbstan
 Type: Package
-Title: MCMC Sampling from TMB Model Object using STAN
+Title: MCMC Sampling from TMB Model Object using Stan
 Version: 1.0
 Date: 2017-09-02
 Author: Kasper Kristensen
 Maintainer: Kasper Kristensen <kaskr@dtu.dk>
-Description: MCMC sampling from TMB model object using STAN.
+Description: MCMC sampling from TMB model object using Stan.
 Imports: methods, Rcpp
 Depends:
     rstan, TMB

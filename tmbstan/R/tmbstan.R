@@ -63,7 +63,7 @@ setMethod("sampling", "tmbstanmodel",
           })
 
 
-##' Draw MCMC samples from a TMB model object using STAN
+##' Draw MCMC samples from a TMB model object using Stan
 ##' @param obj TMB model object.
 ##' @param ... Passed to \code{rstan::sampling} with some modifications - see details.
 ##' @param lower Vector of lower parameter bounds.

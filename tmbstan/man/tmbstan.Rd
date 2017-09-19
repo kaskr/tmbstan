@@ -2,7 +2,7 @@
 % Please edit documentation in R/tmbstan.R
 \name{tmbstan}
 \alias{tmbstan}
-\title{Draw MCMC samples from a TMB model object using STAN}
+\title{Draw MCMC samples from a TMB model object using Stan}
 \usage{
 tmbstan(obj, ..., lower = numeric(0), upper = numeric(0), laplace = FALSE,
   silent = TRUE, debug = FALSE)
@@ -26,7 +26,7 @@ tmbstan(obj, ..., lower = numeric(0), upper = numeric(0), laplace = FALSE,
 Object of class \code{stanfit}
 }
 \description{
-Draw MCMC samples from a TMB model object using STAN
+Draw MCMC samples from a TMB model object using Stan
 }
 \details{
 \code{tmbstan} works for models with or without random effects.
