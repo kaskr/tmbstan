@@ -40,6 +40,17 @@ All methods provided by the \code{rstan} package can be applied to a
 fitted object. Get a complete list using
 \code{methods(class="stanfit")}.
 
+Lower and upper bounds can be set using \code{lower} and \code{upper}.
+The bounds can be specified in one of two ways. Either in short
+format, i.e. have the same length as \code{obj$par}. Remaining
+parameters (the random effects) are set as unbounded in this case.
+Otherwise the bounds must be in long format, i.e. have the same
+length as the full parameter vector \code{obj$env$par} including the
+random effects.
+In both cases \code{-Inf} and \code{Inf} are valid components of
+\code{lower} and \code{upper} respectively.
+Note that initial values must be within the specified bounds.
+
 The function arguments \code{...} are passed to \code{rstan}s
 fitting function. For a complete list see \code{?rstan::sampling}. A
 few notable arguments are:
