@@ -4,19 +4,16 @@
 
 MCMC sampling from TMB model object using STAN.
 
+## Requirements
+
+TMB version `>= 1.7.12` (on CRAN). Models must be re-compiled using
+this new version.
+
 ## Install
 
 ```r
 devtools::install_github("kaskr/tmbstan", subdir="tmbstan")
 ```
-
-The development version of TMB is required
-
-```r
-devtools::install_github("kaskr/adcomp", subdir="TMB")
-```
-
-Shared object files must be re-compiled using the new version.
 
 ## Examples
 
