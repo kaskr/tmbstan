@@ -8,7 +8,7 @@ Maintainer: Kasper Kristensen <kaskr@dtu.dk>
 Description: MCMC sampling from TMB model object using Stan.
 Imports: methods, Rcpp
 Depends:
-    rstan, TMB
+    rstan, TMB (>= 1.7.12)
 LinkingTo: StanHeaders, rstan, BH, Rcpp, RcppEigen, TMB
 License: GPL (>= 3)
 NeedsCompilation: yes
