@@ -111,6 +111,18 @@ compare(fit2, fit2.)
 
 ######################################################################
 ##
+## Example 2b: Previous in parallel
+##
+######################################################################
+fit2b <- sampling(mod2, seed=1, chains=2, iter=iter,
+                  data = list(), cores=2)
+fit2b. <- tmbstan(obj, seed=1, chains=2, iter=iter,
+                  lower=c(-2,-1), upper=c(0,1), init="random",
+                  cores=2)
+compare(fit2b, fit2b.)
+
+######################################################################
+##
 ## Example 3: IID normal constrained mix of finite and infinite bounds
 ##
 ######################################################################
