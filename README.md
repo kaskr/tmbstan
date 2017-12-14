@@ -12,7 +12,7 @@ this new version.
 ## Install
 
 ```r
-devtools::install_github("kaskr/tmbstan", subdir="tmbstan")
+devtools::install_github("kaskr/tmbstan/tmbstan")
 ```
 
 ## Examples
