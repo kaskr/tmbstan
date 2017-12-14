@@ -33,10 +33,10 @@ tmbstan_model <- function(par, fn, gr, lower=numeric(0), upper=numeric(0)) {
 }
 
 ##' @importMethodsFrom rstan sampling
-##' @importFrom methods as
+##' @importFrom methods selectMethod
 ##' @useDynLib tmbstan, .registration=TRUE
 setMethod("sampling", "tmbstanmodel",
-          function(object, ...) {
+          function(object, data=NULL, ...) {
               x <- numeric(length(object@par))
               fn <- object@fn
               gr <- object@gr
@@ -55,7 +55,27 @@ setMethod("sampling", "tmbstanmodel",
               env <- environment()
               .Call("set_pointers", x, R_callf, R_callg, env,
                     object@ptr, object@DLL, PACKAGE="tmbstan")
-              sampling(as(object, "stanmodel"),
+              ## ===============================================================
+              ## Parallelization on Windows requires:
+              ##   1.  library(tmbstan) loaded on nodes
+              ##   2.  DLL loaded on nodes
+              ##   3.  'sampling.stanmodel'    bypassed by
+              ##       'sampling.tmbstanmodel' on nodes
+              ##
+              ## (1)
+              oldprof <- Sys.getenv("R_PROFILE")
+              tmpfile <- tempfile()
+              cat("library(tmbstan)\n", file=tmpfile)
+              ## (2)
+              cat(paste0("dyn.load('",
+                         unclass(getLoadedDLLs()[[environment(fn)$DLL]])$path,
+                         "')\n"), file=tmpfile, append=TRUE)
+              Sys.setenv(R_PROFILE = tmpfile)
+              on.exit( { Sys.setenv(R_PROFILE = oldprof); file.remove(tmpfile) } )
+              ## (3)
+              sampling <- selectMethod("sampling", "stanmodel")
+              ## ===============================================================
+              sampling(object, ## class="tmbstanmodel" !
                        data = list(N = length(x),
                                    have_bounds=have_bounds,
                                    lower_bound=lower,
