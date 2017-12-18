@@ -123,15 +123,23 @@ setMethod("sampling", "tmbstanmodel",
 ##' \item \code{chains} The number of chains.
 ##' \item \code{iter}   The number of iterations.
 ##' \item \code{init}   Initial values for the sampler.
-##' Differs slightly from \code{rstan}. If unspecified, the best encountered
-##' parameter \code{obj$env$last.par.best} is used (The MLE with corresponding posterior modes if an
-##' optimization has been carried out - otherwise simply \code{obj$par}). We also
-##' allow to pass a single numeric, or a list of numerics with same length
-##' as the number of chains. Numeric vectors should have the same length
-##' as the number of sampled parameters and names are currently ignored. Parameters
+##' Behaves like \code{rstan} with some additions:
+##' \itemize{
+##' \item Default is \code{"random"} - see \code{?stan}.
+##' \item Special values \code{0} and \code{"0"} are allowed - see \code{?stan}.
+##' \item Additional special characters \code{"par"} and \code{"last.par.best"} are allowed
+##'       and will be looked up in the TMB model object.
+##'       The value \code{"par"} signifies to start from the defaults of the model object.
+##'       If an optimization has been carried out, the intial value \code{"last.par.best"}
+##'       will start from the MLE.
+##' \item We also allow to pass a single numeric vector, or a list of numeric vectors.
+##'       List length must match the number of chains. Vector lengths must match the
+##'       number of sampled parameters. Names are currently ignored.
+##' \item Parameters
 ##' that do not follow the previous scheme (e.g. characters) are passed on
 ##' to \code{rstan} unchanged. If in doubt, use \code{rstan::get_inits} to inspect the
 ##' applied initial values.
+##' }
 ##' \item \code{seed} Random seed.
 ##' }
 ##' @importFrom TMB runExample
