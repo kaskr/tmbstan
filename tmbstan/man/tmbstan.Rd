@@ -51,9 +51,9 @@ In both cases \code{-Inf} and \code{Inf} are valid components of
 \code{lower} and \code{upper} respectively.
 Note that initial values must be within the specified bounds.
 
-The function arguments \code{...} are passed to \code{rstan}s
-fitting function. For a complete list see \code{?rstan::sampling}. A
-few notable arguments are:
+The function arguments \code{...} are passed to \code{rstan}'s
+fitting function, see \code{?rstan::sampling}.
+A few notable arguments are:
 \itemize{
 \item \code{chains} The number of chains.
 \item \code{iter}   The number of iterations.
