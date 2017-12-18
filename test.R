@@ -235,3 +235,37 @@ tab5. <- summary(fit5.,pars=names(obj$par))$c_summary
 diff <- (tab5-tab5.)[,c("mean", "sd", "25%", "50%", "75%"),]
 print(diff)
 stopifnot( max(abs(diff)) < .01 )
+
+######################################################################
+##
+## Example 5b: TMB's simple example - test initial value "0"
+##
+######################################################################
+
+fit5b <- sampling(mod5, seed=1, chains=2, iter=100,
+                  data = data, init=0 )
+fit5b. <- tmbstan(obj, seed=1, chains=2, iter=100, init=0)
+
+## Identical inits ?
+stopifnot( identical(get_inits(fit5b), get_inits(fit5b.)) )
+
+
+######################################################################
+##
+## Example 5c: TMB's simple example - test initial value function
+##
+######################################################################
+
+init.fn <- function() list(beta=rnorm(2),
+                           logsdu=rnorm(1),
+                           logsd0=rnorm(1),
+                           u=rnorm(114))
+
+set.seed(1)
+fit5c <- sampling(mod5, seed=1, chains=2, iter=100,
+                  data = data, init=init.fn )
+set.seed(1)
+fit5c. <- tmbstan(obj, seed=1, chains=2, iter=100, init=init.fn)
+
+## Identical inits ?
+stopifnot( identical(get_inits(fit5c), get_inits(fit5c.)) )
