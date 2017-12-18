@@ -123,15 +123,23 @@ setMethod("sampling", "tmbstanmodel",
 ##' \item \code{chains} The number of chains.
 ##' \item \code{iter}   The number of iterations.
 ##' \item \code{init}   Initial values for the sampler.
-##' Differs slightly from \code{rstan}. If unspecified, the best encountered
-##' parameter \code{obj$env$last.par.best} is used (The MLE with corresponding posterior modes if an
-##' optimization has been carried out - otherwise simply \code{obj$par}). We also
-##' allow to pass a single numeric, or a list of numerics with same length
-##' as the number of chains. Numeric vectors should have the same length
-##' as the number of sampled parameters and names are currently ignored. Parameters
+##' Behaves like \code{rstan} with some additions:
+##' \itemize{
+##' \item Default is \code{"random"} - see \code{?stan}.
+##' \item Special values \code{0} and \code{"0"} are allowed - see \code{?stan}.
+##' \item Additional special characters \code{"par"} and \code{"last.par.best"} are allowed
+##'       and will be looked up in the TMB model object.
+##'       The value \code{"par"} signifies to start from the defaults of the model object.
+##'       If an optimization has been carried out, the intial value \code{"last.par.best"}
+##'       will start from the MLE.
+##' \item We also allow to pass a single numeric vector, or a list of numeric vectors.
+##'       List length must match the number of chains. Vector lengths must match the
+##'       number of sampled parameters. Names are currently ignored.
+##' \item Parameters
 ##' that do not follow the previous scheme (e.g. characters) are passed on
 ##' to \code{rstan} unchanged. If in doubt, use \code{rstan::get_inits} to inspect the
 ##' applied initial values.
+##' }
 ##' \item \code{seed} Random seed.
 ##' }
 ##' @importFrom TMB runExample
@@ -200,13 +208,29 @@ tmbstan <- function(obj,
     ## Args for call to 'sampling'
     args <- list(object = mod, ...)
 
-    ## Initialization of mcmc. Options:
-    ##   1. Mode if available (last.par.best)
-    ##   2. Sample from gaussian posterior
-    ##   3. rstan defaults (rnorm I think ?)
+    ## Set rstan default chains
+    chains <- args$chains
+    if (is.null(chains)) chains <- 4
+
+    ## Handle initial values
+    shortParNames <- unique(names(par))
+    shortParLengths <- table(factor(names(par), levels=shortParNames))
+    specialChars <- c("par", "last.par", "last.par.best")
     initSanitizer <- function(x) {
         if (is.list(x)) {
-            x <- unlist(x) ## FIXME: We could do better by accounting for list names
+            ## Permute list
+            x <- x[shortParNames]
+            names(x) <- shortParNames ## Some names coud be NA otherwise
+            ## Check lengths of list components
+            spl <- sapply(x, length)
+            if (!identical( as.vector(spl), as.vector(shortParLengths) )) {
+                cat("Expected parameter lengths:\n")
+                print(shortParLengths)
+                cat("Got:\n")
+                print(spl)
+                stop("Wrong length of list component")
+            }
+            x <- unlist(x)
             initSanitizer(x)
         }
         else if (is.numeric(x)) {
@@ -220,23 +244,38 @@ tmbstan <- function(obj,
             init$y <- x
             init
         }
+        else if (is.character(x) && (x %in% specialChars) ) {
+            x <- get(x, envir=obj$env)
+            initSanitizer(x)
+        }
         else
             x
     }
-    chains <- args$chains
-    if (is.null(chains)) chains <- 4 ## rstan default
     if (is.null(args$init)) {
-        ## Set our default
-        args$init <- list(par)
-    }
-    if (!is.null(args$init)) {
+        ## rstan default
+        args$init <- "random"
+    } else {
+        ## Get
+        init <- args$init
+        ## From rstan's sampling function:
+        if (is.numeric(init) && length(init == 1))
+            init <- as.character(init)
+        if (is.function(init)) {
+            if ("chain_id" %in% names(formals(init)))
+                init <- lapply(1:chains, FUN = init)
+            else init <- lapply(1:chains, function(id) init())
+        }
         ## User specified initializer list - sanitize
-        if (is.numeric(args$init))
-            args$init <- list(args$init)
-        if (is.list(args$init))
-            args$init <- lapply(args$init, initSanitizer)
-        if (is.list(args$init))
-            args$init <- rep(args$init, length.out=chains)
+        if (is.numeric(init))
+            init <- list(init)
+        if (is.list(init))
+            init <- lapply(init, initSanitizer)
+        if (is.list(init) && ( length(init) != chains ) ) {
+            warning("Re-cycling inits to match number of chains")
+            init <- rep(init, length.out=chains)
+        }
+        ## Set
+        args$init <- init
     }
 
     do.call("sampling", args)
