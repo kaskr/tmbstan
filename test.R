@@ -58,7 +58,7 @@ dyn.load(dynlib("tmbcode"))
 obj <- MakeADFun(data=list(),
                  parameters=list(y=rep(0,5)),
                  DLL="tmbcode")
-fit1. <- tmbstan(obj, seed=seed, chains=chains, iter=iter, init="random")
+fit1. <- tmbstan(obj, seed=seed, chains=chains, iter=iter)
 
 ## Compare output
 compare(fit1, fit1.)
@@ -73,7 +73,7 @@ fit1b <- sampling(mod1, seed=seed, chains=1, iter=iter,
                   data = list(N = 5),
                   init = list(list(y=c(-2:2))) )
 fit1b. <- tmbstan(obj, seed=seed, chains=1, iter=iter,
-                  init=list(list(c(-2:2))) )
+                  init=list(list(y=c(-2:2))) )
 compare(fit1b, fit1b.)
 
 ######################################################################
@@ -104,7 +104,7 @@ obj <- MakeADFun(data=list(),
                  parameters=list(y=rep(0,2)),
                  DLL="tmbcode")
 fit2. <- tmbstan(obj, seed=seed, chains=chains, iter=iter,
-                 lower=c(-2,-1), upper=c(0,1), init="random")
+                 lower=c(-2,-1), upper=c(0,1))
 
 ## Compare output
 compare(fit2, fit2.)
@@ -117,7 +117,7 @@ compare(fit2, fit2.)
 fit2b <- sampling(mod2, seed=1, chains=2, iter=iter,
                   data = list(), cores=2)
 fit2b. <- tmbstan(obj, seed=1, chains=2, iter=iter,
-                  lower=c(-2,-1), upper=c(0,1), init="random",
+                  lower=c(-2,-1), upper=c(0,1),
                   cores=2)
 compare(fit2b, fit2b.)
 
@@ -147,7 +147,7 @@ obj <- MakeADFun(data=list(),
                  parameters=list(y=rep(0,2)),
                  DLL="tmbcode")
 fit3. <- tmbstan(obj, seed=seed, chains=chains, iter=iter,
-                 lower=c(-2,-1), upper=c(0,Inf), init="random")
+                 lower=c(-2,-1), upper=c(0,Inf))
 
 ## Compare output
 compare(fit3, fit3.)
@@ -164,7 +164,7 @@ fit3b <- sampling(mod3, seed=seed, chains=1, iter=iter,
                   init = list(list(y1=-1,y2=0)) )
 fit3b. <- tmbstan(obj, seed=seed, chains=1, iter=iter,
                   lower=c(-2,-1), upper=c(0,Inf),
-                  init=list(list(c(-1,0))) )
+                  init=list(list(y=c(-1,0))) )
 compare(fit3b, fit3b.)
 
 ######################################################################
@@ -178,7 +178,7 @@ fit4 <- sampling(mod3, seed=seed, chains=chains, iter=iter,
                  algorithm="HMC")
 
 fit4. <- tmbstan(obj, seed=seed, chains=chains, iter=iter,
-                 lower=c(-2,-1), upper=c(0,Inf), init="random",
+                 lower=c(-2,-1), upper=c(0,Inf),
                  algorithm="HMC")
 
 ## Compare output
@@ -228,7 +228,7 @@ mod5 <- stan_model(model_code = stancode, model_name="stan",
 fit5 <- sampling(mod5, seed=1, chains=1, iter=10000,
                  data = data )
 
-fit5. <- tmbstan(obj, seed=1, chains=1, iter=10000, init="random")
+fit5. <- tmbstan(obj, seed=1, chains=1, iter=10000)
 
 tab5  <- summary(fit5, pars=names(obj$par))$c_summary
 tab5. <- summary(fit5.,pars=names(obj$par))$c_summary
