@@ -146,6 +146,7 @@ setMethod("sampling", "tmbstanmodel",
 ##' @examples
 ##' runExample("simple")
 ##' fit <- tmbstan(obj, chains=1)
+##' class(fit)  ## "stanfit"
 ##'
 ##' ## The avilable methods are
 ##' methods(class="stanfit")
