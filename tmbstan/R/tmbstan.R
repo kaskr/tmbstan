@@ -148,7 +148,7 @@ setMethod("sampling", "tmbstanmodel",
 ##' fit <- tmbstan(obj, chains=1)
 ##' class(fit)  ## "stanfit"
 ##'
-##' ## The avilable methods are
+##' ## The available methods are
 ##' methods(class="stanfit")
 ##'
 ##' \dontrun{
