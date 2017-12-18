@@ -27,3 +27,11 @@ check:
 pdf:
 	rm -f $(PACKAGE).pdf
 	$(R) CMD Rd2pdf --no-preview $(PACKAGE)
+
+cran-version:
+	cd tmbstan; git clean -xdf
+	#rm -rf tmbstan/tests
+	#mkdir -p tmbstan/tests
+	#cp test.R tmbstan/tests
+	make doc-update
+	make build
