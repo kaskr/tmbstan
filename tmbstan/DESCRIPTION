@@ -1,6 +1,6 @@
 Package: tmbstan
 Type: Package
-Title: MCMC Sampling from 'TMB' Model Object using Stan
+Title: MCMC Sampling from 'TMB' Model Object using 'Stan'
 Version: 1.0.0
 Date: 2017-12-18
 Author: Kasper Kristensen
