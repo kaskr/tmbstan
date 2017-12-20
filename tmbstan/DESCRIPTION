@@ -9,7 +9,7 @@ Description: Enables all 'rstan' functionality for a 'TMB' model object, in part
 Imports: methods, Rcpp
 Depends:
     rstan, TMB (>= 1.7.12)
-LinkingTo: StanHeaders, rstan, BH, Rcpp, RcppEigen, TMB
+LinkingTo: StanHeaders, rstan, BH, Rcpp, RcppEigen
 License: GPL (>= 3)
 BugReports: https://github.com/kaskr/tmbstan/issues
 NeedsCompilation: yes
