@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/kaskr/tmbstan.svg?branch=master)](https://travis-ci.org/kaskr/tmbstan)
 
-MCMC sampling from TMB model object using STAN.
+MCMC sampling from [TMB](https://github.com/kaskr/adcomp/wiki) (Template Model Builder) model object using STAN.
 
 ## Requirements
 
