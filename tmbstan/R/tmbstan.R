@@ -279,5 +279,7 @@ tmbstan <- function(obj,
         args$init <- init
     }
 
-    do.call("sampling", args)
+    ans <- do.call("sampling", args)
+    ans@model_name <- obj$env$DLL
+    ans
 }
