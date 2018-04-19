@@ -269,3 +269,16 @@ fit5c. <- tmbstan(obj, seed=1, chains=2, iter=100, init=init.fn)
 
 ## Identical inits ?
 stopifnot( identical(get_inits(fit5c), get_inits(fit5c.)) )
+
+######################################################################
+##
+## Example 5d: TMB's simple example - test init="last.par.best"
+##
+######################################################################
+
+fit5d <- tmbstan(obj, seed=1, chains=2, iter=100,
+                 init=c("par", "last.par.best") )
+compare(obj$env$par,
+        unlist(get_inits(fit5d)[[1]]) )
+compare(obj$env$last.par.best,
+        unlist(get_inits(fit5d)[[2]]) )
