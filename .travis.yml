@@ -4,6 +4,8 @@ sudo: false
 
 cache: packages
 
+dist: xenial
+
 os:
   - linux
 
