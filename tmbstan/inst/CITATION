@@ -1,0 +1,20 @@
+bibentry(bibtype = "Article",
+  title        = "No-U-turn sampling for fast Bayesian inference in ADMB and TMB: Introducing the adnuts and tmbstan R packages",
+  author       = c(person(given = "Cole",
+                          family = "Monnahan",
+                          email = "monnahc@uw.edu"),
+                   person(given = "Kasper",
+                          family = "Kristensen",
+                          email = "kaskr@dtu.dk")),
+  journal      = "PloS one",
+  year         = "2018",
+  volume       = "13",
+  number       = "5",
+  doi          = "10.1371/journal.pone.0197954",
+  header       = "To cite tmbstan in publications use:",
+  textVersion  =
+  paste("Monnahan CC, Kristensen K (2018).",
+        "No-U-turn sampling for fast Bayesian inference in ADMB and TMB: Introducing the adnuts and tmbstan R packages",
+        "PLoS ONE 13(5): e0197954.",
+        "https://doi.org/10.1371/journal.pone.0197954")
+)
