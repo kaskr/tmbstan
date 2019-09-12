@@ -22,15 +22,61 @@ devtools::install_github("kaskr/tmbstan/tmbstan")
 ```r
 library(tmbstan)
 runExample("simple")
+## Run a single chain in serial with defaults
 fit <- tmbstan(obj, chains=1)
 
-## Methods provided by 'rstan'
+## Run in parallel with a init function
+cores <- parallel::detectCores()-1
+options(mc.cores = cores)
+init.fn <- function()
+  list(u=rnorm(114), beta=rnorm(2), logsdu=runif(1,0,10), logsd0=runif(1,0,1))
+fit <- tmbstan(obj, chains=cores, open_progress=FALSE,
+               init=init.fn)
+
+## To explore the fit use shinystan
+library(shinystan)
+launch_shinystan(fit)
+
+## Can also get ESS and Rhat from rstan::monitor
+mon <- monitor(fit)
+max(mon$Rhat)
+min(mon$Tail_ESS)
+
+## Other methods provided by 'rstan'
 class(fit)
 methods(class="stanfit")
-
-## Pairs plot
+## Pairs plot of the fixed effects
 pairs(fit, pars=names(obj$par))
-
 ## Trace plot
 traceplot(fit, pars=names(obj$par), inc_warmup=TRUE)
+
+## Can extract marginal posteriors easily
+post <- as.matrix(fit)
+hist(post[,'u[1]'])                     # random effect
+hist(post[,'logsd0'])                   # fixed effect
+
+## What if you want a posterior for derived quantities in the report? Just
+## loop through each posterior sample (row) and call the report function
+## which returns a list.
+obj$report(post[1,-ncol(post)])         # sd0 is only element
+sd0 <- rep(NA, len=nrow(post))
+for(i in 1:nrow(post)){
+  ## Drop the last column which is the log-posterior density (lp__) and not
+  ## a parameter
+  r <- obj$report(post[i,-ncol(post)])
+  sd0[i] <- r$sd0
+}
+hist(sd0)
+
+## It is also possible to use the Laplace approximation to integrate the
+## random effects while using NUTS to integrate the fixed effects.
+## ****This is generally not recommended****
+init.fn <- function()
+  list(beta=rnorm(2), logsdu=runif(1,0,10), logsd0=runif(1,0,1))
+fit <- tmbstan(obj, chains=cores, open_progress=FALSE,
+               init=init.fn, laplace=TRUE)
+## There are no posterior samples for the random effects because they are
+## integrated by the LA. See Monnahan and Kristensen (2019) for discussion
+## of why this would be worth doing.
+names(as.data.frame(fit))
 ```
