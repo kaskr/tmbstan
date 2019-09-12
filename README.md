@@ -22,6 +22,7 @@ devtools::install_github("kaskr/tmbstan/tmbstan")
 ```r
 library(tmbstan)
 runExample("simple")
+
 ## Run a single chain in serial with defaults
 fit <- tmbstan(obj, chains=1)
 
@@ -30,8 +31,7 @@ cores <- parallel::detectCores()-1
 options(mc.cores = cores)
 init.fn <- function()
   list(u=rnorm(114), beta=rnorm(2), logsdu=runif(1,0,10), logsd0=runif(1,0,1))
-fit <- tmbstan(obj, chains=cores, open_progress=FALSE,
-               init=init.fn)
+fit <- tmbstan(obj, chains=cores, open_progress=FALSE, init=init.fn)
 
 ## To explore the fit use shinystan
 library(shinystan)
@@ -57,12 +57,11 @@ hist(post[,'logsd0'])                   # fixed effect
 
 ## What if you want a posterior for derived quantities in the report? Just
 ## loop through each posterior sample (row) and call the report function
-## which returns a list.
+## which returns a list. The last column is the log-posterior density (lp__)
+## and needs to be dropped
 obj$report(post[1,-ncol(post)])         # sd0 is only element
 sd0 <- rep(NA, len=nrow(post))
 for(i in 1:nrow(post)){
-  ## Drop the last column which is the log-posterior density (lp__) and not
-  ## a parameter
   r <- obj$report(post[i,-ncol(post)])
   sd0[i] <- r$sd0
 }
@@ -75,8 +74,10 @@ init.fn <- function()
   list(beta=rnorm(2), logsdu=runif(1,0,10), logsd0=runif(1,0,1))
 fit <- tmbstan(obj, chains=cores, open_progress=FALSE,
                init=init.fn, laplace=TRUE)
+
 ## There are no posterior samples for the random effects because they are
-## integrated by the LA. See Monnahan and Kristensen (2019) for discussion
-## of why this would be worth doing.
+## integrated out by the LA. See Monnahan and Kristensen (2019) for discussion
+## of why this would be worth doing. Typically it will be slower and less
+## accurate than laplace=FALSE (the default).
 names(as.data.frame(fit))
 ```
