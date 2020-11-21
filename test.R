@@ -234,7 +234,7 @@ tab5  <- summary(fit5, pars=names(obj$par))$c_summary
 tab5. <- summary(fit5.,pars=names(obj$par))$c_summary
 diff <- (tab5-tab5.)[,c("mean", "sd", "25%", "50%", "75%"),]
 print(diff)
-stopifnot( max(abs(diff)) < .01 )
+stopifnot( max(abs(diff)) < .02 )
 
 ######################################################################
 ##
