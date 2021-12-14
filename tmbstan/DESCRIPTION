@@ -1,8 +1,8 @@
 Package: tmbstan
 Type: Package
 Title: MCMC Sampling from 'TMB' Model Object using 'Stan'
-Version: 1.0.2
-Date: 2019-05-18
+Version: 1.0.3
+Date: 2021-12-14
 Author: Kasper Kristensen
 Maintainer: Kasper Kristensen <kaskr@dtu.dk>
 Description: Enables all 'rstan' functionality for a 'TMB' model object, in particular MCMC sampling and chain visualization. Sampling can be performed with or without Laplace approximation for the random effects.
