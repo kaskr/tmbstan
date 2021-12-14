@@ -13,4 +13,5 @@ LinkingTo: StanHeaders, rstan, BH, Rcpp, RcppEigen, TMB, RcppParallel
 License: GPL (>= 3)
 BugReports: https://github.com/kaskr/tmbstan/issues
 NeedsCompilation: yes
+SystemRequirements: GNU make
 RoxygenNote: 7.1.2
