@@ -13,6 +13,8 @@ tmbstan_model <- function(par, fn, gr, lower=numeric(0), upper=numeric(0)) {
     model_code <- "tmb_generic"
     dso <- new("cxxdso")
     model_cppcode <- readLines(system.file("model.hpp", package="tmbstan"))
+    ## Convert to single string to avoid issue with 'rstan:::test_221'
+    model_cppcode <- paste(model_cppcode, collapse="\n")
     mk_cppmodule <- function(x) stan_fit4model_tmb
     obj <- new("stanmodel",
                model_name = model_name,
