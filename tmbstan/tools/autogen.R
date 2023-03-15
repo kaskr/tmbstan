@@ -4,7 +4,7 @@ modfile <- "src/Modules.cpp"
 cpyfile <- "inst/model.hpp"
 
 ## ?stan_model
-if (utils::packageVersion("rstan") <= 2.21) {
+if (utils::packageVersion("rstan") < 2.26) {
   stan_file <- "inst/model.stan"
 } else {
   stan_file <- "inst/model226.stan"
