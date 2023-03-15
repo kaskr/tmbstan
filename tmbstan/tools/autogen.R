@@ -41,7 +41,7 @@ lp_accum__.add(custom_func::custom_func(y));
 "
 searchReplace(pattern, replace)
 
-if (utils::packageVersion("rstan") <= 2.21) {
+if (utils::packageVersion("rstan") < 2.26) {
   ## Handle bounds
   pattern <- "writer__.vector_unconstrain(y);"
   replace <- "
