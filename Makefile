@@ -3,6 +3,7 @@ R=R
 
 PACKAGE=tmbstan
 VERSION := $(shell sed -n '/^Version: /s///p' tmbstan/DESCRIPTION)
+DATE := $(shell sed -n '/^Date: /s///p' tmbstan/DESCRIPTION)
 TARBALL := $(PACKAGE)_$(VERSION).tar.gz
 
 install:
@@ -35,3 +36,14 @@ cran-version:
 	#cp test.R tmbstan/tests
 	make doc-update
 	make build
+
+## Get a rough changelog since most recent github revision tag
+## (Use as starting point when updating NEWS file)
+## NOTE: Run *after* updating version and date in DESCRIPTION.
+changelog:
+	echo; \
+	echo "------------------------------------------------------------------------"; \
+	echo tmbstan $(VERSION) \($(DATE)\); \
+	echo "------------------------------------------------------------------------"; \
+	echo; \
+	git --no-pager log --format="o %B" `git describe --abbrev=0 --tags`..HEAD | sed s/^-/\ \ -/g
