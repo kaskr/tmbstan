@@ -4,8 +4,15 @@
 \alias{tmbstan}
 \title{Draw MCMC samples from a TMB model object using Stan}
 \usage{
-tmbstan(obj, ..., lower = numeric(0), upper = numeric(0), laplace = FALSE,
-  silent = TRUE, debug = FALSE)
+tmbstan(
+  obj,
+  ...,
+  lower = numeric(0),
+  upper = numeric(0),
+  laplace = FALSE,
+  silent = TRUE,
+  debug = FALSE
+)
 }
 \arguments{
 \item{obj}{TMB model object.}
@@ -94,4 +101,3 @@ pairs(fit, pars=names(obj$par))
 ## Trace plot
 traceplot(fit, pars=names(obj$par), inc_warmup=TRUE)
 }
-
