@@ -3,7 +3,7 @@
 setClass("tmbstanmodel",
          contains="stanmodel",
          slots = list(par="numeric", fn="function", gr="function",
-                      lower="numeric", upper="numeric",
+                      lower="array", upper="array",
                       ptr="externalptr", DLL="character")
 )
 
@@ -29,8 +29,8 @@ tmbstan_model <- function(par, fn, gr, lower=numeric(0), upper=numeric(0)) {
     ans@gr <- gr
     stopifnot( length(lower) == length(upper) )
     stopifnot( length(lower) == 0 || length(lower) == length(par) )
-    ans@lower <- lower
-    ans@upper <- upper
+    ans@lower <- as.array(lower)
+    ans@upper <- as.array(upper)
     ans
 }
 
