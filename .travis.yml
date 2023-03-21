@@ -4,7 +4,7 @@ sudo: false
 
 cache: packages
 
-dist: xenial
+dist: bionic
 
 os:
   - linux
