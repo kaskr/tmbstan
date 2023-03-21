@@ -9,6 +9,8 @@ dist: bionic
 os:
   - linux
 
+install: travis_wait mvn install
+
 jobs:
   include:
 
