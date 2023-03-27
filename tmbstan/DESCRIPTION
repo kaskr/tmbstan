@@ -7,9 +7,8 @@ Author: Kasper Kristensen
 Maintainer: Kasper Kristensen <kaskr@dtu.dk>
 Description: Enables all 'rstan' functionality for a 'TMB' model object, in particular MCMC sampling and chain visualization. Sampling can be performed with or without Laplace approximation for the random effects. This is demonstrated in Monnahan & Kristensen (2018) <DOI:10.1371/journal.pone.0197954>.
 Imports: methods, Rcpp
-Depends:
-    rstan, TMB (>= 1.7.12)
-LinkingTo: StanHeaders, rstan, BH, Rcpp, RcppEigen, TMB, RcppParallel
+Depends: rstan
+LinkingTo: StanHeaders, rstan, BH, Rcpp, RcppEigen, TMB (>= 1.7.12), RcppParallel
 License: GPL (>= 3)
 BugReports: https://github.com/kaskr/tmbstan/issues
 NeedsCompilation: yes

@@ -146,7 +146,7 @@ setMethod("sampling", "tmbstanmodel",
 ##' }
 ##' @importFrom TMB runExample
 ##' @examples
-##' runExample("simple")
+##' TMB::runExample("simple")
 ##' fit <- tmbstan(obj, chains=1)
 ##' class(fit)  ## "stanfit"
 ##'
