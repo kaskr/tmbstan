@@ -86,7 +86,7 @@ applied initial values.
 }
 }
 \examples{
-runExample("simple")
+TMB::runExample("simple")
 fit <- tmbstan(obj, chains=1)
 class(fit)  ## "stanfit"
 
