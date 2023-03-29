@@ -9,8 +9,10 @@ TARBALL := $(PACKAGE)_$(VERSION).tar.gz
 install:
 	R CMD INSTALL --preclean tmbstan
 
-update-stan-model:
-	R --slave < autogen.R
+## TODO: Add this to tools/autogen.R
+update-makevars:
+	rm -f tmbstan/src/Makevars
+	echo "rstantools:::.setup_Makevars('tmbstan')" | R --slave
 
 test:
 	R --vanilla < test.R
