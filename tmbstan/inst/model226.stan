@@ -1,7 +1,7 @@
 functions {
-  vector make_bounds(vector bound_in, int N, int upper) {
+  vector make_bounds(vector bound_in, int N, int is_upper) {
     if (num_elements(bound_in) == 0) {
-      real bound = (upper == 1 ? positive_infinity() : negative_infinity());
+      real bound = (is_upper == 1 ? positive_infinity() : negative_infinity());
       return rep_vector(bound, N);
     } else {
       return bound_in;
