@@ -4,7 +4,7 @@ modfile <- "src/Modules.cpp"
 cpyfile <- "inst/model.hpp"
 
 ## ?stan_model
-if (utils::packageVersion("rstan") < 2.26) {
+if (utils::packageVersion("rstan") < "2.26") {
   stan_file <- "inst/model.stan"
 } else {
   stan_file <- "inst/model226.stan"
@@ -29,9 +29,9 @@ searchReplace <- function(pattern, replace) {
                     "// ====== Custom Edit End\n")
   NULL
 }
-if (utils::packageVersion("rstan") < 2.26) {
+if (utils::packageVersion("rstan") < "2.26") {
   pattern <- "lp_accum__.add(normal_log<propto__>(y, 0, 1));"
-} else if (utils::packageVersion("StanHeaders") >= 2.31) {
+} else if (utils::packageVersion("StanHeaders") >= "2.31") {
   pattern <- "lp_accum__.add(stan::math::normal_lpdf<propto__>(y, 0, 1));"
 } else {
   pattern <- "lp_accum__.add(normal_lpdf<propto__>(y, 0, 1));"
@@ -41,7 +41,7 @@ lp_accum__.add(custom_func::custom_func(y));
 "
 searchReplace(pattern, replace)
 
-if (utils::packageVersion("rstan") < 2.26) {
+if (utils::packageVersion("rstan") < "2.26") {
   ## Handle bounds
   pattern <- "writer__.vector_unconstrain(y);"
   replace <- "
@@ -84,9 +84,9 @@ if (utils::packageVersion("rstan") < 2.26) {
 
 
 ## Handle parameter names
-if (utils::packageVersion("rstan") < 2.26) {
+if (utils::packageVersion("rstan") < "2.26") {
   pattern <- "names__.resize(0);"
-} else if (utils::packageVersion("StanHeaders") >= 2.31) {
+} else if (utils::packageVersion("StanHeaders") >= "2.31") {
   pattern <- "names__ = std::vector<std::string>{\"y\"}"
 } else {
   pattern <- "names__.clear()"
@@ -98,9 +98,9 @@ return;
 "
 searchReplace(pattern, replace)
 
-if (utils::packageVersion("rstan") < 2.26) {
+if (utils::packageVersion("rstan") < "2.26") {
   pattern <- "dimss__.resize(0);"
-} else if (utils::packageVersion("StanHeaders") >= 2.31) {
+} else if (utils::packageVersion("StanHeaders") >= "2.31") {
   pattern <- "dimss__ = std::vector<std::vector<size_t>>{std::vector<size_t>{static_cast<"
 } else {
   pattern <- "dimss__.clear();"
@@ -120,7 +120,7 @@ return;
 searchReplace(pattern, replace)
 
 # Part of the dimss__ declaration trails over to a second line under 2.31, cleanup:
-if (utils::packageVersion("StanHeaders") >= 2.31) {
+if (utils::packageVersion("StanHeaders") >= "2.31") {
   mod <- gsub("\\b\\s*size_t>\\(N\\)}};", "", mod)
 }
 
@@ -129,5 +129,3 @@ writeLines(mod, outfile)
 
 ## Need a copy in 'inst' folder
 file.copy(outfile, cpyfile, overwrite=TRUE)
-
-
