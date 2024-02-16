@@ -55,6 +55,12 @@ setMethod("sampling", "tmbstanmodel",
               shortpar_len <- table(factor(parnames, levels=unique(parnames)))
               shortpar_nam <- names(shortpar_len)
               env <- environment()
+              if ( length(object@DLL) > 0 ) { ## CCallable requested
+                  if (TMB:::isNullPointer(object@ptr)) {
+                      try(fn()) ## Update pointers (might be Nil on Windows parallel node)
+                      object@ptr <- environment(fn)$ADFun$ptr
+                  }
+              }
               .Call("set_pointers", x, R_callf, R_callg, env,
                     object@ptr, object@DLL, PACKAGE="tmbstan")
               ## ===============================================================
