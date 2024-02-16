@@ -69,15 +69,21 @@ setMethod("sampling", "tmbstanmodel",
               ##   2.  DLL loaded on nodes
               ##   3.  'sampling.stanmodel'    bypassed by
               ##       'sampling.tmbstanmodel' on nodes
+              ##   4.  library(RTMB) loaded on nodes if DLL="RTMB"
               ##
               ## (1)
               oldprof <- Sys.getenv("R_PROFILE")
               tmpfile <- tempfile()
-              cat("library(tmbstan)\n", file=tmpfile)
-              ## (2)
-              cat(paste0("dyn.load('",
-                         unclass(getLoadedDLLs()[[environment(fn)$DLL]])$path,
-                         "')\n"), file=tmpfile, append=TRUE)
+              DLL <- environment(fn)$DLL
+              isRTMB <- (DLL == "RTMB")
+              code <- c(
+                  "require <- function(...) {",
+                  "base::require(RTMB)"[isRTMB],
+                  paste0("dyn.load('",
+                  unclass(getLoadedDLLs()[[DLL]])$path,
+                  "')")[!isRTMB],
+                  "}")
+              cat(paste0(code, "\n"), file=tmpfile)
               Sys.setenv(R_PROFILE = tmpfile)
               on.exit( { Sys.setenv(R_PROFILE = oldprof); file.remove(tmpfile) } )
               ## (3)
@@ -288,6 +294,24 @@ tmbstan <- function(obj,
         }
         ## Set
         args$init <- init
+    }
+    ## Handle RTMB for parallel models on Windows:
+    ## clusterExport normally exports the enclosing environment of a
+    ## function, but not when it's the .GlobalEnv !
+    if (obj$env$DLL == "RTMB") {
+        if (!is.null(args$cores)) {
+            if (args$cores > 1) {
+                if (.Platform$OS.type == "windows") {
+                    rtmb <- environment(obj$report)
+                    envfunc <- environment(rtmb$func)
+                    if (identical(envfunc, globalenv())) {
+                        environment(rtmb$func) <-
+                            list2env(as.list(globalenv()))
+                        on.exit({environment(rtmb$func) <- globalenv()})
+                    }
+                }
+            }
+        }
     }
 
     ans <- do.call("sampling", args)
