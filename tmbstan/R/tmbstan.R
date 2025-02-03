@@ -73,7 +73,10 @@ setMethod("sampling", "tmbstanmodel",
               ## (1)
               oldprof <- Sys.getenv("R_PROFILE")
               tmpfile <- tempfile()
-              cat("library(tmbstan)\n", file=tmpfile)
+              cat(c(".libPaths(c(",
+                    toString(dQuote(.libPaths(), q = FALSE)),
+                    "))\n"), file=tmpfile)
+              cat("library(tmbstan)\n", file=tmpfile, append=TRUE)
               ## (2)
               cat(paste0("dyn.load('",
                          unclass(getLoadedDLLs()[[environment(fn)$DLL]])$path,
