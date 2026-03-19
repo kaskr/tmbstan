@@ -92,7 +92,7 @@ if (utils::packageVersion("rstan") < "2.26") {
   pattern <- "names__.clear()"
 }
 replace <- "
-SEXP shortpar_nam = Rf_findVar(Rf_install(\"shortpar_nam\"), custom_func::R_env);
+SEXP shortpar_nam = R_getVar(Rf_install(\"shortpar_nam\"), custom_func::R_env, FALSE);
 names__ = Rcpp::as<std::vector<std::string> >(shortpar_nam);
 return;
 "
@@ -107,7 +107,7 @@ if (utils::packageVersion("rstan") < "2.26") {
 }
 
 replace <- "
-SEXP shortpar_len = Rf_findVar(Rf_install(\"shortpar_len\"), custom_func::R_env);
+SEXP shortpar_len = R_getVar(Rf_install(\"shortpar_len\"), custom_func::R_env, FALSE);
 for(int i=0; i<LENGTH(shortpar_len); i++) {
   std::vector<size_t> dims__;
   dims__.resize(0);
