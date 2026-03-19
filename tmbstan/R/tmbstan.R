@@ -155,20 +155,22 @@ setMethod("sampling", "tmbstanmodel",
 ##' }
 ##' @importFrom TMB runExample
 ##' @examples
-##' TMB::runExample("simple")
-##' fit <- tmbstan(obj, chains=1)
-##' class(fit)  ## "stanfit"
-##'
-##' ## The available methods are
-##' methods(class="stanfit")
-##'
+##' if (requireNamespace("RTMB")) {
+##'    func <- function(parms) {
+##'       -sum(RTMB::dnorm(rivers, parms$mu, exp(parms$logsd), log=TRUE))
+##'    }
+##'    obj <- RTMB::MakeADFun(func, parameters=list(mu=0, logsd=0))
+##'    fit <- tmbstan(obj, chains=1)
+##'    class(fit)  ## "stanfit"
+##'    ## The available methods are
+##'    methods(class="stanfit")
+##'    ## Trace plot
+##'    traceplot(fit, pars=names(obj$par), inc_warmup=TRUE)
+##' }
 ##' \dontrun{
 ##' ## Pairs plot
 ##' pairs(fit, pars=names(obj$par))
 ##' }
-##'
-##' ## Trace plot
-##' traceplot(fit, pars=names(obj$par), inc_warmup=TRUE)
 tmbstan <- function(obj,
                     ...,
                     lower=numeric(0), upper=numeric(0),
