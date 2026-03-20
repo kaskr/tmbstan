@@ -3,7 +3,10 @@ Type: Package
 Title: MCMC Sampling from 'TMB' Model Object using 'Stan'
 Version: 1.1.0
 Date: 2026-03-20
-Author: Kasper Kristensen
+Authors@R: person(given = "Kasper",
+                  family = "Kristensen",
+                  role = c("aut", "cre"),
+                  email = "kaskr@dtu.dk")
 Maintainer: Kasper Kristensen <kaskr@dtu.dk>
 Description: Enables all 'rstan' functionality for a 'TMB' model object, in particular MCMC sampling and chain visualization. Sampling can be performed with or without Laplace approximation for the random effects. This is demonstrated in Monnahan & Kristensen (2018) <DOI:10.1371/journal.pone.0197954>.
 Imports: methods, Rcpp, TMB
