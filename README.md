@@ -1,6 +1,6 @@
 ## Package tmbstan
 
-[![Build Status](https://travis-ci.org/kaskr/tmbstan.svg?branch=master)](https://travis-ci.org/kaskr/tmbstan)
+[![tmbstan status badge](https://kaskr.r-universe.dev/tmbstan/badges/version)](https://kaskr.r-universe.dev/tmbstan)
 
 MCMC sampling from [TMB](https://github.com/kaskr/adcomp/wiki) (Template Model Builder) model object using Stan. See
 
@@ -21,7 +21,7 @@ devtools::install_github("kaskr/tmbstan/tmbstan")
 
 ```r
 library(tmbstan)
-runExample("simple")
+TMB:::runExample("simple")
 
 ## Run a single chain in serial with defaults
 fit <- tmbstan(obj, chains=1)
