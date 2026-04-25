@@ -12,7 +12,8 @@ Description: Enables all 'rstan' functionality for a 'TMB' model object, in part
 Imports: methods, Rcpp, TMB
 Depends: R (>= 4.5.0), rstan
 LinkingTo: StanHeaders, rstan, BH, Rcpp, RcppEigen, TMB, RcppParallel
-Suggests: RTMB
+VignetteBuilder: knitr, rmarkdown
+Suggests: knitr, rmarkdown, RTMB
 License: GPL (>= 3)
 BugReports: https://github.com/kaskr/tmbstan/issues
 NeedsCompilation: yes

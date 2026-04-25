@@ -49,3 +49,8 @@ changelog:
 	echo "------------------------------------------------------------------------"; \
 	echo; \
 	git --no-pager log --format="o %B" `git describe --abbrev=0 --tags`..HEAD | sed s/^-/\ \ -/g
+
+## vignettes
+%.html: %.rmd
+	cd tmbstan/vignettes; echo "rmarkdown::render(basename(\"$<\"))" | R --slave
+vignettes-build: tmbstan/vignettes/tmbstan.html

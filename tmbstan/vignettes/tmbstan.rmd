@@ -1,0 +1,101 @@
+---
+title: "Sampling from TMB models using Stan"
+author: "Kasper Kristensen"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Sampling from TMB models using Stan}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE, message=FALSE}
+##library(knitr)
+library(RTMB)
+library(tmbstan)
+set.seed(1)
+formals(MakeADFun)$silent <- TRUE
+```
+
+# How to sample
+
+We consider the random regression example from the `RTMB` introduction vignette:
+
+```{r}
+## Data
+data(ChickWeight)
+
+## Parameters and random effects
+parameters <- list(
+    mua=0,          ## Mean slope
+    sda=1,          ## Std of slopes
+    mub=0,          ## Mean intercept
+    sdb=1,          ## Std of intercepts
+    sdeps=1,        ## Residual Std
+    a=rep(0, 50),   ## Random slope by chick
+    b=rep(0, 50)    ## Random intercept by chick
+)
+
+## Negative log likelihood
+f <- function(parms) {
+    getAll(ChickWeight, parms, warn=FALSE)
+    ## Optional (enables extra RTMB features)
+    weight <- OBS(weight)
+    ## Initialize joint negative log likelihood
+    nll <- 0
+    ## Random slopes
+    nll <- nll - sum(dnorm(a, mean=mua, sd=sda, log=TRUE))
+    ## Random intercepts
+    nll <- nll - sum(dnorm(b, mean=mub, sd=sdb, log=TRUE))
+    ## Data
+    predWeight <- a[Chick] * Time + b[Chick]
+    nll <- nll - sum(dnorm(weight, predWeight, sd=sdeps, log=TRUE))
+    ## Get predicted weight uncertainties
+    ADREPORT(predWeight)
+    ## Return
+    nll
+}
+```
+
+We build the `TMB` model object (following the original example, we specify the `random` effects although that is redundant here):
+
+```{r}
+obj <- MakeADFun(f, parameters, random=c("a", "b"))
+```
+
+A full Bayesian analysis is run by:
+
+```{r}
+out <- tmbstan(obj, chains=1, seed=1)
+```
+
+# Improving sampling speed
+
+MCMC runs for large models can take a very long time.
+A simple strategy for improving sampling speed is to speed up the objective function and gradient by enabling vectorization.
+
+```{r}
+TapeConfig(vectorize="enable")  ## Enable vectorization
+obj_vect <- MakeADFun(f, parameters, random=c("a", "b"))
+TapeConfig(vectorize="disable") ## Restore previous settings
+```
+
+We can check the effect of this optimization before starting the potentially long MCMC run. For accurate timing, excluding R overhead, we use the `RTMB` tape `timer()` method, and report an average over `1e4` evaluations of the `total` tape pass:
+
+```{r}
+## Timing without vectorization
+t <- GetTape(obj)$timer(rep=1e4,total=TRUE)
+## Timing with vectorization
+t_vect <- GetTape(obj_vect)$timer(rep=1e4,total=TRUE)
+## speedup ?
+c(speedup = unname(t / t_vect))
+```
+
+In this case vectorization appears to be beneficial. Let's compare the MCMC runs:
+
+```{r}
+system.time(out <- tmbstan(obj, chains=1, seed=1, refresh = 0))
+system.time(out_vect <- tmbstan(obj_vect, chains=1, seed=1, refresh = 0))
+```
