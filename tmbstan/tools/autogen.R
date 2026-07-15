@@ -4,11 +4,7 @@ modfile <- "src/Modules.cpp"
 cpyfile <- "inst/model.hpp"
 
 ## ?stan_model
-if (utils::packageVersion("rstan") < "2.26") {
-  stan_file <- "inst/model.stan"
-} else {
-  stan_file <- "inst/model226.stan"
-}
+stan_file <- "inst/model.stan"
 mod <- rstan::stanc(stan_file, model_name="tmb", verbose=TRUE, obfuscate_model_name = FALSE)
 
 cat("#define STAN__SERVICES__COMMAND_HPP\n#include <rstan/rstaninc.hpp>\n#include \"custom_func.hpp\"\n\n",
@@ -29,68 +25,14 @@ searchReplace <- function(pattern, replace) {
                     "// ====== Custom Edit End\n")
   NULL
 }
-if (utils::packageVersion("rstan") < "2.26") {
-  pattern <- "lp_accum__.add(normal_log<propto__>(y, 0, 1));"
-} else if (utils::packageVersion("StanHeaders") >= "2.31") {
-  pattern <- "lp_accum__.add(stan::math::normal_lpdf<propto__>(y, 0, 1));"
-} else {
-  pattern <- "lp_accum__.add(normal_lpdf<propto__>(y, 0, 1));"
-}
+pattern <- "lp_accum__.add(stan::math::std_normal_lpdf<propto__>(y));"
 replace <- "
 lp_accum__.add(custom_func::custom_func(y));
 "
 searchReplace(pattern, replace)
 
-if (utils::packageVersion("rstan") < "2.26") {
-  ## Handle bounds
-  pattern <- "writer__.vector_unconstrain(y);"
-  replace <- "
-  if (!have_bounds) {
-    writer__.vector_unconstrain(y);
-  } else {
-  for (int j1__ = 0U; j1__ < N; ++j1__)
-    writer__.scalar_lub_unconstrain(lower_bound(j1__), upper_bound(j1__), y(j1__));
-  }
-  "
-  searchReplace(pattern, replace)
-  pattern <- "y = in__.vector_constrain(N, lp__);"
-  replace <- "
-  {
-  if(!have_bounds) {
-    y = in__.vector_constrain(N, lp__);
-  } else {
-    y.resize(N);
-    for (int j1__ = 0U; j1__ < N; ++j1__)
-      y(j1__) = in__.scalar_lub_constrain(lower_bound(j1__), upper_bound(j1__), lp__);
-  }
-  }
-  "
-  searchReplace(pattern, replace)
-  pattern <- "Eigen::Matrix<double, Eigen::Dynamic, 1> y = in__.vector_constrain(N);"
-  replace <- paste0("\nEigen::Matrix<double, Eigen::Dynamic, 1> y;\n", gsub(",[ ]*lp__","",replace)) ## Remove lp__ from previous
-  searchReplace(pattern, replace)
-  pattern <- "y = in__.vector_constrain(N);"
-  replace <- "
-  if(!have_bounds) {
-  y = in__.vector_constrain(N);
-  } else {
-  y.resize(N);
-  for (int j1__ = 0U; j1__ < N; ++j1__)
-    y(j1__) = in__.scalar_lub_constrain(lower_bound(j1__), upper_bound(j1__));
-  }
-  "
-  searchReplace(pattern, replace)
-}
-
-
 ## Handle parameter names
-if (utils::packageVersion("rstan") < "2.26") {
-  pattern <- "names__.resize(0);"
-} else if (utils::packageVersion("StanHeaders") >= "2.31") {
-  pattern <- "names__ = std::vector<std::string>{\"y\"}"
-} else {
-  pattern <- "names__.clear()"
-}
+pattern <- "names__ = std::vector<std::string>{\"y\"}"
 replace <- "
 SEXP shortpar_nam = R_getVar(Rf_install(\"shortpar_nam\"), custom_func::R_env, static_cast<Rboolean>(0));
 names__ = Rcpp::as<std::vector<std::string> >(shortpar_nam);
@@ -98,14 +40,7 @@ return;
 "
 searchReplace(pattern, replace)
 
-if (utils::packageVersion("rstan") < "2.26") {
-  pattern <- "dimss__.resize(0);"
-} else if (utils::packageVersion("StanHeaders") >= "2.31") {
-  pattern <- "dimss__ = std::vector<std::vector<size_t>>{std::vector<size_t>{static_cast<"
-} else {
-  pattern <- "dimss__.clear();"
-}
-
+pattern <- "dimss__ = std::vector<std::vector<size_t>>{std::vector<size_t>{static_cast<"
 replace <- "
 SEXP shortpar_len = R_getVar(Rf_install(\"shortpar_len\"), custom_func::R_env, static_cast<Rboolean>(0));
 for(int i=0; i<LENGTH(shortpar_len); i++) {
@@ -120,9 +55,7 @@ return;
 searchReplace(pattern, replace)
 
 # Part of the dimss__ declaration trails over to a second line under 2.31, cleanup:
-if (utils::packageVersion("StanHeaders") >= "2.31") {
-  mod <- gsub("\\b\\s*size_t>\\(N\\)}};", "", mod)
-}
+mod <- gsub("\\b\\s*size_t>\\(N\\)}};", "", mod)
 
 ## Write
 writeLines(mod, outfile)
