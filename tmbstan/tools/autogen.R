@@ -18,8 +18,8 @@ searchReplace <- function(pattern, replace) {
   i <- grep(pattern, mod, fixed=TRUE)
   i <- setdiff(i, grep("====== Custom Edit Begin", mod))
   stopifnot( length(i) >= 1 )
-  if(length(i) > 1) warning("More than one match; Using first")
-  i <- i[1]
+  ##if(length(i) > 1) warning("More than one match; Using first")
+  ##i <- i[1]
   mod[i] <<- paste0("\n// ====== Custom Edit Begin",
                     replace,
                     "// ====== Custom Edit End\n")
