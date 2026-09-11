@@ -14,7 +14,7 @@ Imports: methods, Rcpp, TMB
 Depends: R (>= 4.5.0), rstan
 LinkingTo: StanHeaders, rstan, BH, Rcpp, RcppEigen, TMB, RcppParallel
 VignetteBuilder: knitr, rmarkdown
-Suggests: knitr, rmarkdown, RTMB
+Suggests: knitr, rmarkdown, RTMB, tinytest
 License: GPL (>= 3)
 BugReports: https://github.com/kaskr/tmbstan/issues
 NeedsCompilation: yes
