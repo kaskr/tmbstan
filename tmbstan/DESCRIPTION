@@ -6,7 +6,8 @@ Date: 2026-07-23
 Authors@R: c(person(given = "Kasper",
                   family = "Kristensen",
                   role = c("aut", "cre"),
-                  email = "kaskr@dtu.dk"),
+                  email = "kaskr@dtu.dk",
+                  comment = c(ORCID="0000-0003-3425-3762")),
                   person("Andrew", "Johnson", role = c("ctb")),
                   person("Cole", "Monnahan", role = c("ctb")) )
 Author: Kasper Kristensen [aut, cre] (<https://orcid.org/0000-0003-3425-3762>), Andrew Johnson [ctb], Cole Monnahan [ctb]
