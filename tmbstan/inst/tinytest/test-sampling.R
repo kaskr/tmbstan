@@ -54,3 +54,21 @@ out <- tmbstan(obj, chains=1, seed=1)
 expected <- c(8.46596098980211, 3.6052470808301, 29.0456997822677, 11.0220591012495,  12.9226467890375)
 ans <- get_posterior_mean(out)[1:5]
 expect_equal(ans, expected, tol=0.1, info="Sample random regression")
+
+######################################################################
+## User-supplied initial values
+######################################################################
+f <- function(parms) -sum(dnorm(parms$p, 0, 1, log=TRUE))
+## first-chain inits (NULL if sampling did not run); all tests here use one chain
+get_init <- function(s) unname(unlist(get_inits(s)))
+## One parameter: every explicit init form must reach the sampler
+obj1 <- MakeADFun(f, list(p=0), silent=TRUE)
+for (init in list(list(0.5), list(list(p=0.5)), function() 0.5)) {
+    s <- tmbstan(obj1, chains=1, iter=100, seed=1, refresh=0, init=init)
+    expect_equal(length(s@sim$samples), 1, info="One-parameter init: sampling ran")
+    expect_equal(get_init(s), 0.5, info="One-parameter init: value used")
+}
+## A single numeric vector is used as the init for every chain
+obj2 <- MakeADFun(f, list(p=c(0, 0)), silent=TRUE)
+s <- tmbstan(obj2, chains=1, iter=100, seed=1, refresh=0, init=c(0.5, -0.5))
+expect_equal(get_init(s), c(0.5, -0.5), info="Numeric vector init")

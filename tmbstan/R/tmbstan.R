@@ -255,7 +255,9 @@ tmbstan <- function(obj,
             ## none of the 'get_param_names' are present in the list
             init[[names(par)[1]]] <- numeric()
             ## Set the actual init parameter (Name 'y' is used by the generic model.hpp)
-            init$y <- x
+            ## 'y' must have a dim attribute: rstan treats a dimensionless
+            ## length-1 vector as a scalar, which fails for a one-parameter model
+            init$y <- array(x, dim = length(x))
             init
         }
         else if (is.character(x) && (x %in% specialChars) ) {
@@ -272,7 +274,7 @@ tmbstan <- function(obj,
         ## Get
         init <- args$init
         ## From rstan's sampling function:
-        if (is.numeric(init) && length(init == 1))
+        if (is.numeric(init) && length(init) == 1)
             init <- as.character(init)
         if (is.function(init)) {
             if ("chain_id" %in% names(formals(init)))
